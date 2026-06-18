@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SurvMarkt Dashboard</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+.dark{
+    background:#0f172a !important;
+}
+
+.dark main{
+    background:#0f172a;
+}
+
+.dark .bg-white{
+    background:#1e293b !important;
+    color:white !important;
+}
+
+.dark .dark-reset-btn{
+    background:#334155 !important;
+    color:white !important;
+}
+
+.dark .dark-reset-btn:hover{
+    background:#475569 !important;
+}
+
+.dark input::placeholder{
+    color:#94a3b8;
+}
+
+.dark select::placeholder{
+    color:#94a3b8;
+}
+
+.dark #resultCount{
+    color:#cbd5e1 !important;
+}
+
+.dark input,
+.dark select,
+.dark textarea{
+
+    background:#334155 !important;
+    color:white !important;
+    border-color:#475569 !important;
+
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder{
+
+    color:#94a3b8 !important;
+
+}
+
+.dark textarea:focus{
+
+    outline:none;
+    border-color:#818cf8 !important;
+
+    box-shadow:
+    0 0 0 2px rgba(129,140,248,.3);
+
+}
+
+.dark .text-slate-800,
+.dark .text-slate-500,
+.dark .text-gray-500{
+
+    color:#cbd5e1 !important;
+
+}
+
+.dark #surveyList > div,
+.dark #stats > div{
+
+    background:#1e293b !important;
+    color:white !important;
+
+}
+
+.dark hr{
+    border-color:#64748b !important;
+}
+
+.dark #adminStats > div{
+
+    background:#1e293b !important;
+
+    color:white !important;
+
+}
+
+</style>
+
+</head>
+
+<body class="bg-slate-100">
+
+<!-- TOAST -->
+
+<div
+    id="toast"
+    class="fixed top-5 right-5 hidden px-4 py-3 rounded-xl shadow-lg text-white z-50"
+>
+</div>
+
+<div class="flex">
+
+    <!-- SIDEBAR -->
+
+    <aside
+        id="sidebar"
+        class="
+        w-72
+        min-h-screen
+        bg-indigo-600
+        text-white
+        p-6
+        transition-all
+        duration-300
+        "
+    >
+        <div
+            class="flex justify-between items-center mb-4"
+        >
+
+            <button
+                onclick="toggleSidebar()"
+                class="
+                bg-indigo-500
+                px-3
+                py-2
+                rounded-lg
+                hover:bg-indigo-400
+                "
+            >
+                ☰
+            </button>
+
+        </div>
+    
+        <div 
+            id="sidebarContent">
+        </div>
+
+        <h1
+            id="logoText"
+            class="text-3xl font-bold transition-all duration-300"
+        >
+            SurvMarkt
+        </h1>
+
+        <p
+            id="sidebarDesc"
+            class="text-sm text-indigo-200 mt-2"
+        >
+            Marketplace Responden Penelitian
+        </p>
+
+        <hr 
+            id="line"
+            class="my-5 border-indigo-400">
+
+        <p
+            id="roleText"
+            class="font-semibold"
+        >
+        </p>
+
+        <!-- WALLET -->
+
+        <div
+            id="walletbox"
+            class="mt-6 bg-indigo-500 rounded-xl p-4 transition-all duration-300"
+        >
+
+            <h3
+                class="font-semibold"
+            >
+                Wallet
+            </h3>
+
+            <p
+                id="wallet"
+                class="text-xl font-bold mt-2"
+            >
+            </p>
+
+            <!-- ROLE BASED ACTION -->
+
+            <div
+                id="walletAction"
+                class="mt-4"
+            >
+            </div>
+
+            <button
+                 onclick="toggleTheme()"
+                id="themeBtn"
+                class="w-full mt-3 bg-slate-700 hover:bg-slate-800 transition py-2 rounded-lg"
+            >
+            
+            </button>
+
+            <button
+                onclick="clearSurvey()"
+                class="w-full mt-2 bg-yellow-500 hover:bg-yellow-600 py-2 rounded-lg"
+            >
+                Clear Survey
+            </button>
+
+        </div>
+
+        <!-- LOGOUT -->
+
+        <button
+            id="logoutbox"
+            onclick="logout()"
+            class="mt-5 w-full bg-red-500 hover:bg-red-600 transition py-2 rounded-lg"
+        >
+            Logout
+        </button>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+
+    <main class="flex-1 p-8">
+
+        <!-- HEADER -->
+
+        <div
+            class="mb-8"
+        >
+
+            <h1
+                class="text-3xl font-bold text-slate-800"
+            >
+                SurvMarkt Dashboard
+            </h1>
+
+            <p
+                class="text-slate-500 mt-2"
+                id="dashboardSubtitle"
+            >
+            </p>
+
+        </div>
+
+        <!-- STATS -->
+
+        <div
+            id="stats"
+            class="grid grid-cols-4 gap-4 mb-8"
+        >
+        </div>
+
+        <!-- PENELITI -->
+
+        <div
+            id="researcherPanel"
+            class="hidden"
+        >
+
+            <div
+                class="grid grid-cols-2 gap-6"
+            >
+
+                <!-- FORM SURVEY -->
+
+                <div
+                    class="bg-white rounded-2xl p-6 shadow transition hover:shadow-xl"
+                >
+
+                    <h3
+                        class="text-xl font-semibold mb-4"
+                    >
+                        Buat Survey
+                    </h3>
+
+                    <input
+                        id="titleSurvey"
+                        placeholder="Judul Survey"
+                        class="w-full border p-3 rounded-lg mb-3"
+                    >
+
+                    <input
+                        id="count"
+                        type="number"
+                        placeholder="Jumlah Responden"
+                        class="w-full border p-3 rounded-lg mb-3"
+                    >
+
+                    <input
+                        id="link"
+                        placeholder="Link Survey"
+                        class="w-full border p-3 rounded-lg"
+                    >
+                    <textarea
+                        id="description"
+                        placeholder="Deskripsi Survey"
+                        rows="4"
+                        class="w-full border p-3 rounded-lg mt-3"
+                    ></textarea>
+
+                    <input
+                        id="duration"
+                        type="number"
+                        placeholder="Estimasi waktu (menit)"
+                        class="w-full border p-3 rounded-lg mt-3"
+                    />
+
+                    <div class="mt-4">
+
+                        <label
+                            class="
+                            flex
+                            items-center
+                            gap-2
+                            cursor-pointer
+                            "
+                        >
+
+                            <input
+                                type="checkbox"
+                                id="featuredSurvey"
+                            >
+
+                            <span>
+                                ⭐ Jadikan Featured Survey (+ Rp 5.000)
+                            </span>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <!-- INSENTIF -->
+
+                <div
+                    class="bg-white rounded-2xl p-6 shadow transition hover:shadow-xl"
+                >
+
+                    <h3
+                        class="text-xl font-semibold mb-4"
+                    >
+                        Insentif
+                    </h3>
+
+                    <input
+                        id="insentif"
+                        type="number"
+                        placeholder="Rekomendasi Rp 1.000 - 5.000"
+                        class="w-full border p-3 rounded-lg mb-2"
+                    >
+
+                    <p
+                        id="incentiveWarning"
+                        class="hidden text-yellow-400 text-sm"
+                    >
+                    </p>
+
+                    <p
+                        class="text-sm text-gray-500 mb-4"
+                    >
+                        SurvMarkt mengenakan
+                        platform fee sebesar
+                        20% dari total biaya survey.
+                    </p>
+
+                    <div class="space-y-2">
+
+                        <p id="subtotal"></p>
+
+                        <p id="platformFee"></p>
+
+                        <p id="featuredFee"></p>
+
+                        <p
+                            id="total"
+                            class="font-bold text-indigo-600"
+                        >
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- FILTER -->
+
+                <div
+                    class="bg-white rounded-2xl p-6 shadow transition hover:shadow-xl"
+                >
+
+                    <h3
+                        class="text-xl font-semibold mb-4"
+                    >
+                        Filter Responden
+                    </h3>
+
+                    <select
+                        id="fGender"
+                        class="w-full border p-3 rounded-lg mb-3"
+                    >
+                        <option value="All">
+                            Semua Gender
+                        </option>
+
+                        <option value="Male">
+                            Male
+                        </option>
+
+                        <option value="Female">
+                            Female
+                        </option>
+
+                    </select>
+
+                    <select
+                        id="fAge"
+                        class="w-full border p-3 rounded-lg mb-3"
+                    >
+                        <option value="All">
+                            Semua Umur
+                        </option>
+
+                        <option value="18-22">
+                            18-22
+                        </option>
+
+                        <option value="23-30">
+                            23-30
+                        </option>
+
+                    </select>
+
+                    <select
+                        id="fStatus"
+                        class="w-full border p-3 rounded-lg"
+                    >
+                        <option value="All">
+                            Semua Status
+                        </option>
+
+                        <option value="Mahasiswa">
+                            Mahasiswa
+                        </option>
+
+                        <option value="Pekerja">
+                            Pekerja
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- MATCHING -->
+
+                <div
+                    class="bg-white rounded-2xl p-6 shadow transition hover:shadow-xl"
+                >
+
+                    <h3
+                        class="text-xl font-semibold mb-4"
+                    >
+                        Matching Responden
+                    </h3>
+
+                    <p
+                        id="match"
+                        class="mb-4"
+                    >
+                    </p>
+
+                    <button
+                        onclick="createSurvey()"
+                        class="bg-indigo-600 hover:bg-indigo-700 transition text-white px-6 py-3 rounded-lg"
+                    >
+                        Submit Survey
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- PROGRESS SURVEY -->
+
+            <div
+            class="bg-white rounded-2xl p-6 shadow mt-6"
+            >
+
+                <h3
+                class="text-xl font-semibold mb-4"
+                >
+                    Progress Survey
+                </h3>
+
+                <div id="surveyProgress">
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- RESPONDEN -->
+
+        <div
+            id="respondentPanel"
+            class="hidden"
+        >
+
+            <!-- FILTER -->
+
+            <div
+                class="bg-white rounded-2xl p-6 shadow mb-6"
+            >
+                <!-- SEARCH SURVEY -->
+
+                <label
+                    class="font-semibold"
+                >
+                    Cari Survey
+                </label>
+
+                <input
+                    id="searchSurvey"
+                    type="text"
+                    placeholder="🔍 Cari berdasarkan judul survey..."
+                    class="w-full border p-3 rounded-lg mt-2 mb-4"
+                    oninput="renderSurvey()"
+                />
+
+                <label
+                    class="font-semibold"
+                >
+                    Filter Minimal Insentif
+                </label>
+
+                <input
+                    id="minPrice"
+                    type="number"
+                    placeholder="Masukkan nominal"
+                    class="w-full border p-3 rounded-lg mt-2"
+                    oninput="renderSurvey()"
+                >
+
+                <button
+                    onclick="resetFilter()"
+                    class="mt-3 bg-slate-200 hover:bg-slate-300 dark-reset-btn transition px-4 py-2 rounded-lg"
+                >
+                     Reset Filter
+                </button>
+
+                <p
+                    id="resultCount"
+                    class="mt-3 text-sm text-gray-500"
+                >
+                </p>
+
+            </div>
+
+            <!-- LIST SURVEY -->
+
+            <div
+                id="surveyList"
+                class="grid grid-cols-2 gap-4"
+            >
+            </div>
+
+        </div>
+
+        <!-- ADMIN -->
+
+        <div
+            id="adminPanel"
+            class="hidden"
+        >   
+
+            <!-- ADMIN STATS -->
+
+            <div
+                id="adminStats"
+                class="grid grid-cols-4 gap-4 mb-8"
+            >
+            </div>
+
+            <!-- BUSINESS METRICS -->
+
+            <div
+                id="businessWrapper"
+                class="
+                rounded-3xl
+                p-8
+                shadow-lg
+                "
+            >
+
+            <h2
+                class="text-2xl font-bold mb-6"
+            >
+                📈 Business Metrics
+            </h2>
+
+            <div
+                id="businessMetrics"
+                class="grid grid-cols-2 gap-6"
+            >
+            </div>
+
+            <div
+                id="withdrawWrapper"
+                class="
+                rounded-3xl
+                p-6
+                shadow-lg
+                mt-6
+                "
+            >
+
+                <h2
+                    class="
+                    text-2xl
+                    font-bold
+                    mb-4
+                    "
+                >
+                    Withdrawal Requests
+                </h2>
+
+                <div
+                    id="withdrawList"
+                >
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    </main>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
