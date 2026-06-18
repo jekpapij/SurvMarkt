@@ -150,7 +150,7 @@
         <!-- STATS -->
         <div id="stats" class="grid grid-cols-4 gap-4 mb-8"></div>
 
-        <!-- ==================== PENELITI PANEL ==================== -->
+        <!-- ==================== RESEARCHER PANEL ==================== -->
         <div id="researcherPanel" class="hidden">
 
             <div class="grid grid-cols-2 gap-6">
@@ -230,7 +230,7 @@
         </div>
         <!-- END researcherPanel -->
 
-        <!-- ==================== RESPONDEN PANEL ==================== -->
+        <!-- ==================== RESPONDENT PANEL ==================== -->
         <div id="respondentPanel" class="hidden">
 
             <!-- FILTER -->
@@ -297,15 +297,7 @@
         </div>
         <!-- END adminPanel -->
 
-        <!--
-            ==================== NOTIFICATIONS ====================
-            Diletakkan DI LUAR semua panel agar selalu ada di DOM.
-            JS pakai getElementById("notificationList") — hanya ambil
-            elemen PERTAMA. Kalau ada 3 ID sama di dalam panel yang
-            hidden, browser selalu resolve ke yg pertama di DOM
-            (peneliti), sehingga respondent & admin tidak pernah
-            ter-render. Solusi: satu elemen, selalu visible di DOM.
-        -->
+        <!-- ==================== NOTIFICATIONS ==================== -->
         <div id="notificationWrapper" class="mt-8 rounded-2xl p-6 shadow bg-white">
             <h2 class="text-xl font-bold mb-4">🔔 Notifications</h2>
             <div id="notificationList"></div>

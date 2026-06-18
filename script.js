@@ -24,10 +24,6 @@ let withdrawals =
         localStorage.getItem("withdrawals")
     ) || [];
 
-/* ====================================
-   HELPER: apply dark/light to wrappers
-==================================== */
-
 function applyWrapperTheme(){
 
     let isDark =
@@ -60,10 +56,6 @@ function applyWrapperTheme(){
     }
 
 }
-
-/* ====================================
-   WINDOW ONLOAD
-==================================== */
 
 window.onload = function(){
 
@@ -147,15 +139,10 @@ window.onload = function(){
     updateStats();
     renderSurveyProgress();
 
-    // FIX: renderNotifications dipanggil SEKALI di sini saja,
-    // tidak lagi dipanggil di dalam tiap blok role agar tidak spam
+    
     renderNotifications();
 
 };
-
-/* ====================================
-   TOAST
-==================================== */
 
 function showToast(msg, type = "info"){
 
@@ -181,10 +168,6 @@ function showToast(msg, type = "info"){
 
 }
 
-/* ====================================
-   WALLET
-==================================== */
-
 function updateWallet(){
 
     wallet.innerText =
@@ -194,10 +177,6 @@ function updateWallet(){
         ).toLocaleString("id-ID");
 
 }
-
-/* ====================================
-   PENELITI
-==================================== */
 
 function deposit(){
 
@@ -224,10 +203,6 @@ function deposit(){
     renderNotifications();
 
 }
-
-/* ====================================
-   RESPONDEN
-==================================== */
 
 function withdraw(){
 
@@ -257,10 +232,6 @@ function withdraw(){
 
 }
 
-/* ====================================
-   LOGOUT
-==================================== */
-
 function logout(){
     localStorage.removeItem("role");
     localStorage.removeItem("gender");
@@ -268,10 +239,6 @@ function logout(){
     localStorage.removeItem("status");
     window.location.href = "index.html";
 }
-
-/* ====================================
-   KALKULATOR INSENTIF
-==================================== */
 
 if(document.getElementById("insentif")){
     insentif.addEventListener("input", calc);
@@ -328,10 +295,6 @@ function calc(){
     }
 
 }
-
-/* ====================================
-   CREATE SURVEY
-==================================== */
 
 function createSurvey(){
 
@@ -408,10 +371,6 @@ function createSurvey(){
     renderNotifications();
 
 }
-
-/* ====================================
-   FILTER RESPONDEN
-==================================== */
 
 function resetFilter(){
     minPrice.value = "";
@@ -524,10 +483,6 @@ function renderHistory(){
 
 }
 
-/* ====================================
-   TAKE SURVEY
-==================================== */
-
 function takeSurvey(i){
 
     let walletVal = Number(localStorage.getItem("wallet"));
@@ -578,10 +533,6 @@ function takeSurvey(i){
     renderNotifications();
 
 }
-
-/* ====================================
-   STATS
-==================================== */
 
 function updateStats(){
 
@@ -656,10 +607,6 @@ function updateStats(){
 
 }
 
-/* ====================================
-   DARK MODE
-==================================== */
-
 function toggleTheme(){
 
     document.body.classList.toggle("dark");
@@ -707,10 +654,6 @@ function clearSurvey(){
     location.reload();
 }
 
-/* ====================================
-   SURVEY PROGRESS
-==================================== */
-
 function renderSurveyProgress(){
 
     let container = document.getElementById("surveyProgress");
@@ -743,10 +686,6 @@ function renderSurveyProgress(){
     });
 
 }
-
-/* ====================================
-   ADMIN STATS
-==================================== */
 
 function renderAdminStats(){
 
@@ -817,10 +756,6 @@ function renderAdminStats(){
 
 }
 
-/* ====================================
-   TOGGLE SIDEBAR
-==================================== */
-
 function toggleSidebar(){
 
     let sidebar = document.getElementById("sidebar");
@@ -835,10 +770,6 @@ function toggleSidebar(){
     document.getElementById("logoutbox")   ?.classList.toggle("hidden");
 
 }
-
-/* ====================================
-   WITHDRAWALS
-==================================== */
 
 function renderWithdrawals(){
 
@@ -920,10 +851,6 @@ function rejectWithdraw(index){
 
 }
 
-/* ====================================
-   NOTIFICATIONS
-==================================== */
-
 function addNotification(message){
 
     notifications.unshift({
@@ -937,7 +864,6 @@ function addNotification(message){
 
 function renderNotifications(){
 
-    // FIX: pakai querySelector agar tidak bergantung pada posisi elemen di DOM
     let list = document.getElementById("notificationList");
     if(!list) return;
 
