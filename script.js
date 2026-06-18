@@ -3,6 +3,14 @@ let surveys =
         localStorage.getItem("surveys")
     ) || [];
 
+let surveyHistory =
+
+    JSON.parse(
+        localStorage.getItem(
+            "surveyHistory"
+        )
+    ) || [];
+
 let fakeUsers = [
 
     {
@@ -99,6 +107,7 @@ window.onload = function(){
         `;
 
     renderSurvey();
+    renderHistory();
 
     }
     else if(
@@ -136,6 +145,24 @@ window.onload = function(){
     updateWallet();
     updateStats();
     renderSurveyProgress();
+
+    let isDark = 
+    document.body.classList.contains(
+        "dark"
+    );
+
+    let historyWrapper = 
+    document.getElementById(
+        "historyWrapper"
+    );
+
+    if(historyWrapper){
+        historyWrapper.className = 
+        isDark
+        ? "mt-8 rounded-2xl p-6 shadow bg-slate-800 text-white"
+        :"mt-8 rounded-2xl p-6 shadow bg-white text-slate-900"
+
+    }
 
 };
 
@@ -947,15 +974,108 @@ function renderSurvey(){
 
     if(result === 0){
 
-        surveyList.innerHTML = `
+        surveyList.classList.add(
+            "hidden"
+        );
 
-            <div class="text-gray-500">
-                Tidak ada survey sesuai filter
-            </div>
+        emptyState.classList.remove(
+            "hidden"
+        );
+
+    }
+    else {
+        surveyList.classList.remove(
+        "hidden"
+        );
+
+        emptyState.classList.add(
+            "hidden"
+        );
+    }
+
+}
+
+function renderHistory(){
+
+    let historyList =
+
+    document.getElementById(
+        "historyList"
+    );
+
+    if(!historyList)
+    return;
+
+    historyList.innerHTML = "";
+
+    let history =
+
+    JSON.parse(
+        localStorage.getItem(
+            "surveyHistory"
+        )
+    ) || [];
+
+    if(
+        history.length === 0
+    ){
+
+        historyList.innerHTML = `
+
+        <p
+        class="text-gray-500"
+        >
+            Belum ada survey yang dikerjakan
+        </p>
 
         `;
 
+        return;
+
     }
+
+    history
+    .slice()
+    .reverse()
+    .forEach(h=>{
+
+        historyList.innerHTML += `
+
+        <div
+        class="
+        border-b
+        py-3
+        "
+        >
+
+            <p
+            class="font-semibold"
+            >
+                ${h.title}
+            </p>
+
+            <p
+            class="text-sm"
+            >
+                💰 Rp
+                ${Number(h.insentif)
+                .toLocaleString("id-ID")}
+            </p>
+
+            <p
+            class="
+            text-xs
+            text-gray-500
+            "
+            >
+                ${h.date}
+            </p>
+
+        </div>
+
+        `;
+
+    });
 
 }
 
@@ -1038,6 +1158,35 @@ function takeSurvey(i){
         "Insentif berhasil ditambahkan",
         "success"
     );
+
+    surveyHistory.push({
+
+        title:
+            surveys[i].title,
+
+        insentif:
+            surveys[i].insentif,
+
+        date:
+            new Date()
+            .toLocaleString(
+                "id-ID"
+            )
+
+    });
+    
+
+    localStorage.setItem(
+
+        "surveyHistory",
+
+        JSON.stringify(
+            surveyHistory
+        )
+
+    );
+
+    renderHistory();
 
     window.open(
         surveys[i].link,
@@ -1244,7 +1393,45 @@ function toggleTheme(){
 
     if(role==="respondent"){
         renderSurvey();
+        renderHistory();
     }    
+
+    let historyWrapper =
+    document.getElementById(
+        "historyWrapper"
+    );
+
+    if(historyWrapper){
+
+        if(isDark){
+
+            historyWrapper.classList.add(
+                "bg-slate-800",
+                "text-white"
+            );
+
+            historyWrapper.classList.remove(
+                "bg-white",
+                "text-slate-900"
+            );
+
+        }
+
+        else{
+
+            historyWrapper.classList.add(
+                "bg-white",
+                "text-slate-900"
+            );
+
+            historyWrapper.classList.remove(
+                "bg-slate-800",
+                "text-white"
+            );
+
+        }
+
+    }
     
 }
 
@@ -1402,6 +1589,7 @@ function renderAdminStats(){
         ? "bg-slate-700 text-white rounded-3xl p-6 shadow-lg mt-6"
         : "bg-slate-100 text-slate-900 rounded-3xl p-6 shadow-lg mt-6"
     }
+    
 
     const cardClass = darkMode
 
