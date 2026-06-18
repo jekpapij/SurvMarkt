@@ -77,7 +77,7 @@ survmarkt/
 ##  Cara Menjalankan
 
 1. Clone atau download repository ini
-2. Buka file `index.html` di browser
+2. Buka file `index.html` lewat Live-Server di browser
 3. Pilih role, isi data, klik **Masuk ke SurvMarkt**
 
 Tidak perlu install apapun.
@@ -91,6 +91,7 @@ Buka browser console (`F12` → Console) lalu jalankan:
 ```js
 localStorage.clear()
 ```
+Refresh page
 
 ---
 
@@ -117,4 +118,4 @@ Login (index.html)
 
 ---
 
-*Dibuat dengan ❤️ untuk Tugas Besar Kewirausahaan Berbasis Teknologi*
+*Dibuat dengan sepenuh ❤️ untuk Tugas Besar Kewirausahaan Berbasis Teknologi*
