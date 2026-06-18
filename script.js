@@ -4,75 +4,85 @@ let surveys =
     ) || [];
 
 let surveyHistory =
-
     JSON.parse(
-        localStorage.getItem(
-            "surveyHistory"
-        )
+        localStorage.getItem("surveyHistory")
+    ) || [];
+
+let notifications =
+    JSON.parse(
+        localStorage.getItem("notifications")
     ) || [];
 
 let fakeUsers = [
-
-    {
-        gender:"Male",
-        age:"18-22",
-        status:"Mahasiswa"
-    },
-
-    {
-        gender:"Female",
-        age:"23-30",
-        status:"Pekerja"
-    },
-
-    {
-        gender:"Male",
-        age:"23-30",
-        status:"Mahasiswa"
-    }
-
+    { gender: "Male",   age: "18-22", status: "Mahasiswa" },
+    { gender: "Female", age: "23-30", status: "Pekerja"   },
+    { gender: "Male",   age: "23-30", status: "Mahasiswa" }
 ];
 
 let withdrawals =
+    JSON.parse(
+        localStorage.getItem("withdrawals")
+    ) || [];
 
-JSON.parse(
-    localStorage.getItem(
-        "withdrawals"
-    )
-) || [];
+/* ====================================
+   HELPER: apply dark/light to wrappers
+==================================== */
+
+function applyWrapperTheme(){
+
+    let isDark =
+        document.body.classList.contains("dark");
+
+    let historyWrapper =
+        document.getElementById("historyWrapper");
+
+    if(historyWrapper){
+        if(isDark){
+            historyWrapper.classList.add("bg-slate-800","text-white");
+            historyWrapper.classList.remove("bg-white","text-slate-900");
+        } else {
+            historyWrapper.classList.add("bg-white","text-slate-900");
+            historyWrapper.classList.remove("bg-slate-800","text-white");
+        }
+    }
+
+    let notificationWrapper =
+        document.getElementById("notificationWrapper");
+
+    if(notificationWrapper){
+        if(isDark){
+            notificationWrapper.classList.add("bg-slate-800","text-white");
+            notificationWrapper.classList.remove("bg-white","text-slate-900");
+        } else {
+            notificationWrapper.classList.add("bg-white","text-slate-900");
+            notificationWrapper.classList.remove("bg-slate-800","text-white");
+        }
+    }
+
+}
+
+/* ====================================
+   WINDOW ONLOAD
+==================================== */
 
 window.onload = function(){
 
-    let savedTheme =
-        localStorage.getItem(
-            "theme"
-        );
-
+    let savedTheme = localStorage.getItem("theme");
     if(savedTheme === "dark"){
-
-        document.body.classList.add(
-            "dark"
-        );
-
+        document.body.classList.add("dark");
     }
 
     updateThemeButton();
+    applyWrapperTheme();
 
-
-    let role =
-        localStorage.getItem("role");
+    let role = localStorage.getItem("role");
 
     roleText.innerText =
-        role === "researcher"
-        ? "Peneliti"
-        : "Responden";
+        role === "researcher" ? "Peneliti" : "Responden";
 
     if(role === "researcher"){
 
-        researcherPanel.classList.remove(
-            "hidden"
-        );
-
+        researcherPanel.classList.remove("hidden");
         dashboardSubtitle.innerText =
             "Kelola survey dan temukan responden yang sesuai";
 
@@ -85,15 +95,16 @@ window.onload = function(){
             </button>
         `;
 
+        let featuredCheckbox =
+            document.getElementById("featuredSurvey");
+        if(featuredCheckbox){
+            featuredCheckbox.addEventListener("change", calc);
+        }
+
     }
-    else if(
-        role === "respondent"
-    ){
+    else if(role === "respondent"){
 
-        respondentPanel.classList.remove(
-            "hidden"
-        );
-
+        respondentPanel.classList.remove("hidden");
         dashboardSubtitle.innerText =
             "Temukan survey yang sesuai dan dapatkan insentif";
 
@@ -106,33 +117,23 @@ window.onload = function(){
             </button>
         `;
 
-    renderSurvey();
-    renderHistory();
+        renderSurvey();
+        renderHistory();
 
     }
-    else if(
-        role === "admin"
-    ){
+    else if(role === "admin"){
 
-        adminPanel.classList.remove(
-            "hidden"
-        );
-
+        adminPanel.classList.remove("hidden");
         dashboardSubtitle.innerText =
             "Monitor performa platform";
 
-        stats.style.display =
-            "none";
+        stats.style.display = "none";
 
-        document.getElementById(
-            "wallet"
-        ).innerText =
+        document.getElementById("wallet").innerText =
             "Platform Admin";
 
         walletAction.innerHTML = `
-            <div
-                class="text-center text-sm text-indigo-100"
-            >
+            <div class="text-center text-sm text-indigo-100">
                 Admin Access
             </div>
         `;
@@ -140,29 +141,15 @@ window.onload = function(){
         renderAdminStats();
         renderWithdrawals();
 
-    }   
+    }
 
     updateWallet();
     updateStats();
     renderSurveyProgress();
 
-    let isDark = 
-    document.body.classList.contains(
-        "dark"
-    );
-
-    let historyWrapper = 
-    document.getElementById(
-        "historyWrapper"
-    );
-
-    if(historyWrapper){
-        historyWrapper.className = 
-        isDark
-        ? "mt-8 rounded-2xl p-6 shadow bg-slate-800 text-white"
-        :"mt-8 rounded-2xl p-6 shadow bg-white text-slate-900"
-
-    }
+    // FIX: renderNotifications dipanggil SEKALI di sini saja,
+    // tidak lagi dipanggil di dalam tiap blok role agar tidak spam
+    renderNotifications();
 
 };
 
@@ -170,54 +157,27 @@ window.onload = function(){
    TOAST
 ==================================== */
 
-function showToast(
-    msg,
-    type = "info"
-){
+function showToast(msg, type = "info"){
 
-    let toast =
-        document.getElementById("toast");
+    let toast = document.getElementById("toast");
 
     toast.className =
         "fixed top-5 right-5 px-4 py-3 rounded-xl shadow-lg text-white z-50";
 
     if(type === "success"){
-
-        toast.classList.add(
-            "bg-green-500"
-        );
-
-    }
-
-    else if(type === "error"){
-
-        toast.classList.add(
-            "bg-red-500"
-        );
-
-    }
-
-    else{
-
-        toast.classList.add(
-            "bg-blue-500"
-        );
-
+        toast.classList.add("bg-green-500");
+    } else if(type === "error"){
+        toast.classList.add("bg-red-500");
+    } else {
+        toast.classList.add("bg-blue-500");
     }
 
     toast.innerText = msg;
-
-    toast.classList.remove(
-        "hidden"
-    );
+    toast.classList.remove("hidden");
 
     setTimeout(() => {
-
-        toast.classList.add(
-            "hidden"
-        );
-
-    },2500);
+        toast.classList.add("hidden");
+    }, 2500);
 
 }
 
@@ -241,50 +201,27 @@ function updateWallet(){
 
 function deposit(){
 
-    let amount =
-        prompt(
-            "Masukkan nominal deposit:"
-        );
-
+    let amount = prompt("Masukkan nominal deposit:");
     if(!amount) return;
 
     amount = Number(amount);
 
     if(amount <= 0){
-
-        showToast(
-            "Nominal tidak valid",
-            "error"
-        );
-
+        showToast("Nominal tidak valid","error");
         return;
     }
 
-    let walletVal =
-        Number(
-            localStorage.getItem("wallet")
-        );
-
+    let walletVal = Number(localStorage.getItem("wallet"));
     walletVal += amount;
 
-    localStorage.setItem(
-        "wallet",
-        walletVal
-    );
-
-    localStorage.setItem(
-        "surveys",
-        JSON.stringify(
-            surveys
-        )
-    );
+    localStorage.setItem("wallet", walletVal);
+    localStorage.setItem("surveys", JSON.stringify(surveys));
 
     updateWallet();
+    showToast("Deposit berhasil","success");
 
-    showToast(
-        "Deposit berhasil",
-        "success"
-    );
+    addNotification("💰 Deposit berhasil");
+    renderNotifications();
 
 }
 
@@ -294,66 +231,29 @@ function deposit(){
 
 function withdraw(){
 
-    let amount = Number(
-        prompt(
-            "Masukkan nominal withdraw"
-        )
-    );
+    let amount = Number(prompt("Masukkan nominal withdraw"));
 
-    if(
-        !amount ||
-        amount <= 0
-    ){
+    if(!amount || amount <= 0) return;
+
+    let walletVal = Number(localStorage.getItem("wallet"));
+
+    if(amount > walletVal){
+        showToast("Saldo tidak cukup","error");
         return;
-    }
-
-    let walletVal =
-        Number(
-            localStorage.getItem(
-                "wallet"
-            )
-        );
-
-    if(
-        amount > walletVal
-    ){
-
-        showToast(
-            "Saldo tidak cukup",
-            "error"
-        );
-
-        return;
-
     }
 
     withdrawals.push({
-
         id: Date.now(),
-
         amount: amount,
-
         status: "Pending"
-
     });
 
-    localStorage.setItem(
+    localStorage.setItem("withdrawals", JSON.stringify(withdrawals));
 
-        "withdrawals",
+    showToast("Request withdraw berhasil dibuat","success");
 
-        JSON.stringify(
-            withdrawals
-        )
-
-    );
-
-    showToast(
-
-        "Request withdraw berhasil dibuat",
-
-        "success"
-
-    );
+    addNotification("📤 Withdrawal request dibuat");
+    renderNotifications();
 
 }
 
@@ -362,185 +262,69 @@ function withdraw(){
 ==================================== */
 
 function logout(){
-
-    localStorage.removeItem(
-        "role"
-    );
-
-    localStorage.removeItem(
-        "gender"
-    );
-
-    localStorage.removeItem(
-        "age"
-    );
-
-    localStorage.removeItem(
-        "status"
-    );
-
-    window.location.href =
-        "index.html";
-
+    localStorage.removeItem("role");
+    localStorage.removeItem("gender");
+    localStorage.removeItem("age");
+    localStorage.removeItem("status");
+    window.location.href = "index.html";
 }
 
 /* ====================================
    KALKULATOR INSENTIF
 ==================================== */
 
-if(
-    document.getElementById(
-        "insentif"
-    )
-){
-
-    insentif.addEventListener(
-        "input",
-        calc
-    );
-
+if(document.getElementById("insentif")){
+    insentif.addEventListener("input", calc);
 }
 
-if(
-    document.getElementById(
-        "count"
-    )
-){
-
-    count.addEventListener(
-        "input",
-        calc
-    );
-
+if(document.getElementById("count")){
+    count.addEventListener("input", calc);
 }
 
 function calc(){
 
-    document
-        .getElementById(
-            "featuredSurvey"
-        )
-        .addEventListener(
-            "change",
-            calc
-        );
-
-    let respondentCount =
-        Number(count.value);
-
-    let reward =
-        Number(insentif.value);
-
-    let subtotal =
-        respondentCount *
-        reward;
-
-    let fee =
-        subtotal *
-        0.20;
+    let respondentCount = Number(count.value);
+    let reward          = Number(insentif.value);
+    let subtotal        = respondentCount * reward;
+    let fee             = subtotal * 0.20;
 
     let featuredFee = 0;
+    if(document.getElementById("featuredSurvey")?.checked){
+        featuredFee = 5000;
+    }
 
-        if(
-            document.getElementById(
-                "featuredSurvey"
-            )?.checked
-        ){
+    let grandTotal = subtotal + fee + featuredFee;
 
-            featuredFee = 5000;
-
-        }
-
-    let featuredElement =
-
-        document.getElementById(
-            "featuredFee"
-        );
-
-    let grandTotal =
-        subtotal +
-        fee+
-        featuredFee;
-
-    subtotalElement =
-        document.getElementById(
-            "subtotal"
-        );
-
-    feeElement =
-        document.getElementById(
-            "platformFee"
-        );
-
-    totalElement =
-        document.getElementById(
-            "total"
-        );
+    let subtotalElement  = document.getElementById("subtotal");
+    let feeElement       = document.getElementById("platformFee");
+    let featuredElement  = document.getElementById("featuredFee");
+    let totalElement     = document.getElementById("total");
 
     subtotalElement.innerText =
-        "Subtotal : Rp " +
-        subtotal.toLocaleString(
-            "id-ID"
-        );
+        "Subtotal : Rp " + subtotal.toLocaleString("id-ID");
 
     featuredElement.innerText =
-
         featuredFee > 0
-
-        ?
-
-        "Featured Survey Fee : Rp " +
-        featuredFee.toLocaleString(
-            "id-ID"
-        )
-
-        :
-
-        "";
+        ? "Featured Survey Fee : Rp " + featuredFee.toLocaleString("id-ID")
+        : "";
 
     feeElement.innerText =
-        "Platform Fee (20%) : Rp " +
-        fee.toLocaleString(
-            "id-ID"
-        );
+        "Platform Fee (20%) : Rp " + fee.toLocaleString("id-ID");
 
     totalElement.innerText =
-        "Total Pembayaran : Rp " +
-        grandTotal.toLocaleString(
-            "id-ID"
-        );
+        "Total Pembayaran : Rp " + grandTotal.toLocaleString("id-ID");
 
-    let warning = 
-        document.getElementById(
-            "incentiveWarning"
-        );
-        
+    let warning = document.getElementById("incentiveWarning");
+
     if(reward <= 5000){
-
-    warning.className =
-        "text-green-400 text-sm";
-
-    warning.innerText =
-        "✅ Rentang insentif rekomendasi";
-
-    }
-    else if(reward <= 20000){
-
-        warning.className =
-            "text-yellow-400 text-sm";
-
-        warning.innerText =
-            "⚠️ High Incentive Survey. Insentif di atas Rp 5.000 akan ditandai oleh sistem!";
-
-    }
-    else{
-
-        warning.className =
-            "text-red-400 text-sm";
-
-        warning.innerText =
-            "🚨 Very High Incentive Survey. Insentif di atas Rp 5.000 akan ditandai oleh sistem!";
-
+        warning.className  = "text-green-400 text-sm";
+        warning.innerText  = "✅ Rentang insentif rekomendasi";
+    } else if(reward <= 20000){
+        warning.className  = "text-yellow-400 text-sm";
+        warning.innerText  = "⚠️ High Incentive Survey. Insentif di atas Rp 5.000 akan ditandai oleh sistem!";
+    } else {
+        warning.className  = "text-red-400 text-sm";
+        warning.innerText  = "🚨 Very High Incentive Survey. Insentif di atas Rp 5.000 akan ditandai oleh sistem!";
     }
 
 }
@@ -551,183 +335,77 @@ function calc(){
 
 function createSurvey(){
 
-    let title =
-        titleSurvey.value.trim();
-
-    let c =
-        Number(count.value);
-
-    let linkVal =
-        link.value.trim();
-    
-    let desc =
-    description.value.trim();
-
-    let durationVal =
-    Number(duration.value);
-
-    let ins =
-        Number(insentif.value);
+    let title       = titleSurvey.value.trim();
+    let c           = Number(count.value);
+    let linkVal     = link.value.trim();
+    let desc        = description.value.trim();
+    let durationVal = Number(duration.value);
+    let ins         = Number(insentif.value);
 
     match.innerText = "";
 
-    if(
-        !title ||
-        !c ||
-        !linkVal ||
-        !ins ||
-        !desc ||
-        !durationVal
-    ){
-
-        showToast(
-            "Semua field harus diisi",
-            "error"
-        );
-
+    if(!title || !c || !linkVal || !ins || !desc || !durationVal){
+        showToast("Semua field harus diisi","error");
         return;
-
     }
 
     if(c <= 0){
-
-        showToast(
-            "Jumlah responden harus > 0",
-            "error"
-        );
-
+        showToast("Jumlah responden harus > 0","error");
         return;
-
     }
 
-    let subtotal =
-        c * ins;
-
-    let fee =
-        subtotal * 0.20;
-    
-    let revenue =
-
-    Number(
-        localStorage.getItem(
-            "revenue"
-        )
-    ) || 0;
+    let subtotal     = c * ins;
+    let fee          = subtotal * 0.20;
+    let revenue      = Number(localStorage.getItem("revenue")) || 0;
 
     revenue += fee;
+    localStorage.setItem("revenue", revenue);
 
-    localStorage.setItem(
-        "revenue",
-        revenue
-    );
-
-    let totalPayment =
-        subtotal + fee;
-
-    let walletVal =
-        Number(
-            localStorage.getItem("wallet")
-        );
+    let totalPayment = subtotal + fee;
+    let walletVal    = Number(localStorage.getItem("wallet"));
 
     if(walletVal < totalPayment){
-
-        showToast(
-            "Saldo tidak cukup",
-            "error"
-        );
-
+        showToast("Saldo tidak cukup","error");
         return;
-
     }
 
-    let matched =
-        fakeUsers.filter(u =>
+    let matched = fakeUsers.filter(u =>
+        (fGender.value === "All" || u.gender === fGender.value) &&
+        (fAge.value    === "All" || u.age    === fAge.value   ) &&
+        (fStatus.value === "All" || u.status === fStatus.value)
+    );
 
-            (
-                fGender.value==="All"
-                ||
-                u.gender===fGender.value
-            )
-
-            &&
-
-            (
-                fAge.value==="All"
-                ||
-                u.age===fAge.value
-            )
-
-            &&
-
-            (
-                fStatus.value==="All"
-                ||
-                u.status===fStatus.value
-            )
-
-        );
-
-    match.innerText =
-        "Estimasi responden cocok : " +
-        matched.length;
+    match.innerText = "Estimasi responden cocok : " + matched.length;
 
     walletVal -= totalPayment;
-
-    localStorage.setItem(
-        "wallet",
-        walletVal
-    );
+    localStorage.setItem("wallet", walletVal);
 
     let survey = {
-
         title,
-
-        description: desc,
-
-        duration: durationVal,
-
-        count:c,
-
-        current:0,
-
-        surveyStatus:"OPEN",
-
-        link:linkVal,
-
-        insentif:ins,
-
-        featured:
-            document.getElementById(
-                "featuredSurvey"
-            ).checked,
-
-        gender:fGender.value,
-
-        age:fAge.value,
-
-        status:fStatus.value
-
+        description  : desc,
+        duration     : durationVal,
+        count        : c,
+        current      : 0,
+        surveyStatus : "OPEN",
+        link         : linkVal,
+        insentif     : ins,
+        featured     : document.getElementById("featuredSurvey").checked,
+        gender       : fGender.value,
+        age          : fAge.value,
+        status       : fStatus.value
     };
 
-    surveys.push(
-        survey
-    );
-
-    localStorage.setItem(
-        "surveys",
-        JSON.stringify(
-            surveys
-        )
-    );
+    surveys.push(survey);
+    localStorage.setItem("surveys", JSON.stringify(surveys));
 
     updateWallet();
     updateStats();
     renderSurveyProgress();
 
-    showToast(
-        "Survey berhasil dibuat",
-        "success"
-    );
+    showToast("Survey berhasil dibuat","success");
+
+    addNotification(`📋 Survey "${title}" berhasil dibuat`);
+    renderNotifications();
 
 }
 
@@ -736,345 +414,112 @@ function createSurvey(){
 ==================================== */
 
 function resetFilter(){
-
     minPrice.value = "";
-
     renderSurvey();
-
-    showToast(
-        "Filter direset",
-        "info"
-    );
-
+    showToast("Filter direset","info");
 }
 
 function renderSurvey(){
 
     let user = {
-
-        gender:
-            localStorage.getItem(
-                "gender"
-            ),
-
-        age:
-            localStorage.getItem(
-                "age"
-            ),
-
-        status:
-            localStorage.getItem(
-                "status"
-            )
-
+        gender : localStorage.getItem("gender"),
+        age    : localStorage.getItem("age"),
+        status : localStorage.getItem("status")
     };
 
-    let min =
-        Number(
-            minPrice.value
-        ) || 0;
-    let keyword =
-        document
-        .getElementById(
-            "searchSurvey"
-        )
-        ?.value
-        .toLowerCase()
-        || "";
+    let min     = Number(minPrice.value) || 0;
+    let keyword = document.getElementById("searchSurvey")?.value.toLowerCase() || "";
+
     surveyList.innerHTML = "";
 
     let result = 0;
 
     let sortedSurvey =
+        [...surveys].sort((a,b) => Number(b.featured) - Number(a.featured));
 
-        [...surveys].sort(
-
-        (a,b)=>
-
-        Number(b.featured)
-
-        -
-
-        Number(a.featured)
-
-    );
-
-    sortedSurvey.forEach((s,i)=>{
+    sortedSurvey.forEach((s,i) => {
 
         if(
-            
-            (
-                s.surveyStatus === "OPEN"
-            )
-
-            &&
-
-            (
-                s.gender==="All"
-                ||
-                s.gender===user.gender
-            )
-
-            &&
-
-            (
-                s.age==="All"
-                ||
-                s.age===user.age
-            )
-
-            &&
-
-            (
-                s.status==="All"
-                ||
-                s.status===user.status
-            )
-
-            &&
-
-            (
-                s.insentif >= min
-            )
-
-            &&
-
-            (
-                s.title
-                .toLowerCase()
-                .includes(keyword)
-            )
-
+            (s.surveyStatus === "OPEN") &&
+            (s.gender === "All" || s.gender === user.gender) &&
+            (s.age    === "All" || s.age    === user.age   ) &&
+            (s.status === "All" || s.status === user.status) &&
+            (s.insentif >= min) &&
+            (s.title.toLowerCase().includes(keyword))
         ){
-
             result++;
 
-            let progress =
-                Math.round(
-                    (
-                        s.current /
-                        s.count
-                    ) * 100
-            );
-
-            let featuredBadge = "";
-
-            if(s.featured){
-
-                featuredBadge = `
-
-                <span
-                class="
-                bg-yellow-400
-                text-black
-                px-2
-                py-1
-                rounded-full
-                text-xs
-                font-bold
-                "
-                >
-                    ⭐ FEATURED
-                </span>
-
-                `;
-
-            }
+            let progress     = Math.round((s.current / s.count) * 100);
+            let featuredBadge = s.featured
+                ? `<span class="bg-yellow-400 text-black px-2 py-1 rounded-full text-xs font-bold">⭐ FEATURED</span>`
+                : "";
 
             surveyList.innerHTML += `
-
             <div class="bg-white rounded-2xl shadow p-5 hover:shadow-xl transition">
-
                 <h3 class="font-bold text-lg">
-                    ${s.title}
-                    ${featuredBadge}
+                    ${s.title} ${featuredBadge}
                 </h3>
-
                 <div class="mt-2">
-
-                <span
-                class="
-                px-2
-                py-1
-                rounded-full
-                text-xs
-                font-bold
-
-            ${
-                s.surveyStatus==="OPEN"
-                ? "bg-green-500 text-white"
-                : "bg-red-500 text-white"
-            }
-            "
-            >
-
-            ${s.surveyStatus}
-
-            </span>
-
-            </div>
-
-                <p class="mt-2 text-sm">
-                    ${s.description}
-                </p>
-
-                <p class="mt-2">
-                    ⏱ ${s.duration} menit
-                </p>
-
-                <p>
-                    🎯 ${s.status}
-                </p>
-
-                <p class="font-semibold mt-2">
-                    Insentif :
-                    Rp ${Number(s.insentif)
-                        .toLocaleString("id-ID")}
-                </p>
-                
-                <p class="mt-2">
-                    Progress:
-                    ${s.current}/${s.count}
-                </p>
-
-                <div
-                class="w-full bg-slate-600 rounded-full h-2 mt-2"
-                >
-
-                    <div
-                    class="bg-green-500 h-2 rounded-full"
-                    style="width:${progress}%"
-                    >
-                    </div>
-
+                    <span class="px-2 py-1 rounded-full text-xs font-bold
+                        ${s.surveyStatus === "OPEN" ? "bg-green-500 text-white" : "bg-red-500 text-white"}">
+                        ${s.surveyStatus}
+                    </span>
                 </div>
-
-                <p class="text-sm mt-1">
-                    ${progress}%
+                <p class="mt-2 text-sm">${s.description}</p>
+                <p class="mt-2">⏱ ${s.duration} menit</p>
+                <p>🎯 ${s.status}</p>
+                <p class="font-semibold mt-2">
+                    Insentif : Rp ${Number(s.insentif).toLocaleString("id-ID")}
                 </p>
-
+                <p class="mt-2">Progress: ${s.current}/${s.count}</p>
+                <div class="w-full bg-slate-600 rounded-full h-2 mt-2">
+                    <div class="bg-green-500 h-2 rounded-full" style="width:${progress}%"></div>
+                </div>
+                <p class="text-sm mt-1">${progress}%</p>
                 <button
                     onclick="takeSurvey(${i})"
                     class="mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
                 >
                     Isi Survey
                 </button>
-
-            </div>
-
-            `;
-
+            </div>`;
         }
-
     });
 
-    resultCount.innerText =
-        result +
-        " survey ditemukan";
+    resultCount.innerText = result + " survey ditemukan";
 
     if(result === 0){
-
-        surveyList.classList.add(
-            "hidden"
-        );
-
-        emptyState.classList.remove(
-            "hidden"
-        );
-
-    }
-    else {
-        surveyList.classList.remove(
-        "hidden"
-        );
-
-        emptyState.classList.add(
-            "hidden"
-        );
+        surveyList.classList.add("hidden");
+        emptyState.classList.remove("hidden");
+    } else {
+        surveyList.classList.remove("hidden");
+        emptyState.classList.add("hidden");
     }
 
 }
 
 function renderHistory(){
 
-    let historyList =
-
-    document.getElementById(
-        "historyList"
-    );
-
-    if(!historyList)
-    return;
+    let historyList = document.getElementById("historyList");
+    if(!historyList) return;
 
     historyList.innerHTML = "";
 
     let history =
+        JSON.parse(localStorage.getItem("surveyHistory")) || [];
 
-    JSON.parse(
-        localStorage.getItem(
-            "surveyHistory"
-        )
-    ) || [];
-
-    if(
-        history.length === 0
-    ){
-
-        historyList.innerHTML = `
-
-        <p
-        class="text-gray-500"
-        >
-            Belum ada survey yang dikerjakan
-        </p>
-
-        `;
-
+    if(history.length === 0){
+        historyList.innerHTML = `<p class="text-gray-500">Belum ada survey yang dikerjakan</p>`;
         return;
-
     }
 
-    history
-    .slice()
-    .reverse()
-    .forEach(h=>{
-
+    history.slice().reverse().forEach(h => {
         historyList.innerHTML += `
-
-        <div
-        class="
-        border-b
-        py-3
-        "
-        >
-
-            <p
-            class="font-semibold"
-            >
-                ${h.title}
-            </p>
-
-            <p
-            class="text-sm"
-            >
-                💰 Rp
-                ${Number(h.insentif)
-                .toLocaleString("id-ID")}
-            </p>
-
-            <p
-            class="
-            text-xs
-            text-gray-500
-            "
-            >
-                ${h.date}
-            </p>
-
-        </div>
-
-        `;
-
+        <div class="border-b py-3">
+            <p class="font-semibold">${h.title}</p>
+            <p class="text-sm">💰 Rp ${Number(h.insentif).toLocaleString("id-ID")}</p>
+            <p class="text-xs text-gray-500">${h.date}</p>
+        </div>`;
     });
 
 }
@@ -1085,113 +530,52 @@ function renderHistory(){
 
 function takeSurvey(i){
 
-    let walletVal =
-        Number(
-            localStorage.getItem("wallet")
-        );
-
-    walletVal +=
-        Number(
-            surveys[i].insentif
-        );
+    let walletVal = Number(localStorage.getItem("wallet"));
+    walletVal    += Number(surveys[i].insentif);
 
     surveys[i].current++;
 
     if(
-        surveys[i].current >=
-        surveys[i].count
+        surveys[i].current >= surveys[i].count &&
+        surveys[i].surveyStatus !== "CLOSED"
     ){
-
-        surveys[i].surveyStatus =
-            "CLOSED";
-
+        surveys[i].surveyStatus = "CLOSED";
+        addNotification(`🎉 Survey "${surveys[i].title}" selesai`);
+        renderNotifications();
     }
 
-    localStorage.setItem(
-        "surveys",
-        JSON.stringify(
-            surveys
-        )
-    );
+    localStorage.setItem("surveys", JSON.stringify(surveys));
+    localStorage.setItem("wallet",  walletVal);
 
-    localStorage.setItem(
-        "wallet",
-        walletVal
-    );
-
-    let taken =
-        Number(
-            localStorage.getItem("taken")
-        ) || 0;
-
-    let earned =
-        Number(
-            localStorage.getItem("earned")
-        ) || 0;
+    let taken  = Number(localStorage.getItem("taken"))  || 0;
+    let earned = Number(localStorage.getItem("earned")) || 0;
 
     taken++;
+    earned += Number(surveys[i].insentif);
 
-    earned +=
-        Number(
-            surveys[i].insentif
-        );
-
-    localStorage.setItem(
-        "taken",
-        taken
-    );
-
-    localStorage.setItem(
-        "earned",
-        earned
-    );
+    localStorage.setItem("taken",  taken);
+    localStorage.setItem("earned", earned);
 
     updateWallet();
-
     updateStats();
-
     renderSurvey();
-
     renderSurveyProgress();
 
-    showToast(
-        "Insentif berhasil ditambahkan",
-        "success"
-    );
+    showToast("Insentif berhasil ditambahkan","success");
 
     surveyHistory.push({
-
-        title:
-            surveys[i].title,
-
-        insentif:
-            surveys[i].insentif,
-
-        date:
-            new Date()
-            .toLocaleString(
-                "id-ID"
-            )
-
+        title   : surveys[i].title,
+        insentif: surveys[i].insentif,
+        date    : new Date().toLocaleString("id-ID")
     });
-    
 
-    localStorage.setItem(
-
-        "surveyHistory",
-
-        JSON.stringify(
-            surveyHistory
-        )
-
-    );
+    localStorage.setItem("surveyHistory", JSON.stringify(surveyHistory));
 
     renderHistory();
+    window.open(surveys[i].link, "_blank");
 
-    window.open(
-        surveys[i].link,
-        "_blank"
-    );
+    addNotification(`✅ Survey "${surveys[i].title}" berhasil diisi`);
+    renderNotifications();
 
 }
 
@@ -1201,149 +585,70 @@ function takeSurvey(i){
 
 function updateStats(){
 
-    let revenue =
-
-    Number(
-        localStorage.getItem(
-            "revenue"
-        )
-    ) || 0;
-
-    let activeSurvey =
-
-    surveys.filter(
-
-    s=>s.surveyStatus==="OPEN"
-
-    ).length;
-
-    let closedSurvey = 
-
-    surveys.filter(
-
-    s=>
-    s.surveyStatus==="CLOSED"
-
-    ).length;
-
-    let role =
-        localStorage.getItem("role");
+    let role = localStorage.getItem("role");
 
     if(role === "researcher"){
 
-        let totalSurvey =
-            surveys.length;
+        let totalSurvey = surveys.length;
 
-        let totalSpent =
-            surveys.reduce(
-                (acc,s)=>{
+        let totalSpent = surveys.reduce((acc,s) => {
+            let subtotal = s.count * s.insentif;
+            let fee      = subtotal * 0.20;
+            return acc + subtotal + fee;
+        }, 0);
 
-                    let subtotal =
-                        s.count *
-                        s.insentif;
-
-                    let fee =
-                        subtotal *
-                        0.20;
-
-                    return acc +
-                        subtotal +
-                        fee;
-
-                },0
-            );
-
-        let totalRespondent =
-            surveys.reduce(
-                (acc,s)=>
-                    acc +
-                    Number(s.count),
-                0
-            );
+        let totalRespondent = surveys.reduce((acc,s) => acc + Number(s.count), 0);
 
         stats.innerHTML = `
-
             <div class="bg-white p-4 rounded-xl shadow">
                 <h3>Total Survey</h3>
                 <p class="text-2xl font-bold">${totalSurvey}</p>
             </div>
-
             <div class="bg-white p-4 rounded-xl shadow">
                 <h3>Total Pengeluaran</h3>
-                <p class="text-2xl font-bold">
-                    Rp ${totalSpent.toLocaleString("id-ID")}
-                </p>
+                <p class="text-2xl font-bold">Rp ${totalSpent.toLocaleString("id-ID")}</p>
             </div>
-
             <div class="bg-white p-4 rounded-xl shadow">
                 <h3>Target Responden</h3>
-                <p class="text-2xl font-bold">
-                    ${totalRespondent}
-                </p>
+                <p class="text-2xl font-bold">${totalRespondent}</p>
             </div>
-
             <div class="bg-white p-4 rounded-xl shadow">
                 <h3>Saldo</h3>
                 <p class="text-2xl font-bold">
                     Rp ${Number(localStorage.getItem("wallet")).toLocaleString("id-ID")}
                 </p>
-            </div>
-
-        `;
+            </div>`;
 
     }
+    else if(role === "respondent"){
 
-    else if(
-        role === "respondent"
-    ){
-
-        let taken =
-            Number(
-                localStorage.getItem("taken")
-            ) || 0;
-
-        let earned =
-            Number(
-                localStorage.getItem("earned")
-            ) || 0;
+        let taken  = Number(localStorage.getItem("taken"))  || 0;
+        let earned = Number(localStorage.getItem("earned")) || 0;
 
         stats.innerHTML = `
-
             <div class="bg-white p-4 rounded-xl shadow">
                 <h3>Survey Diambil</h3>
                 <p class="text-2xl font-bold">${taken}</p>
             </div>
-
             <div class="bg-white p-4 rounded-xl shadow">
                 <h3>Total Pendapatan</h3>
-                <p class="text-2xl font-bold">
-                    Rp ${earned.toLocaleString("id-ID")}
-                </p>
+                <p class="text-2xl font-bold">Rp ${earned.toLocaleString("id-ID")}</p>
             </div>
-
             <div class="bg-white p-4 rounded-xl shadow">
                 <h3>Saldo</h3>
                 <p class="text-2xl font-bold">
                     Rp ${Number(localStorage.getItem("wallet")).toLocaleString("id-ID")}
                 </p>
             </div>
-
             <div class="bg-white p-4 rounded-xl shadow">
                 <h3>Survey Tersedia</h3>
                 <p class="text-2xl font-bold">
-                    ${surveys.filter(
-                        s => s.surveyStatus === "OPEN"
-                    ).length}
+                    ${surveys.filter(s => s.surveyStatus === "OPEN").length}
                 </p>
-            </div>
-
-        `;
+            </div>`;
 
     }
-
-    else if(
-        role === "admin"
-    ){
+    else if(role === "admin"){
 
         stats.innerHTML = "";
 
@@ -1357,632 +662,305 @@ function updateStats(){
 
 function toggleTheme(){
 
-    document.body.classList.toggle(
-        "dark"
-    );
+    document.body.classList.toggle("dark");
 
-    let isDark =
-        document.body.classList.contains(
-            "dark"
-        );
+    let isDark = document.body.classList.contains("dark");
 
-    localStorage.setItem(
-        "theme",
-        isDark
-        ? "dark"
-        : "light"
-    );
+    localStorage.setItem("theme", isDark ? "dark" : "light");
 
     updateThemeButton();
+    applyWrapperTheme();
 
-    let role =
-    localStorage.getItem(
-        "role"
-    );
+    let role = localStorage.getItem("role");
 
-    if(
-        role === "admin"
-    ){
+    if(role === "admin"){
         renderAdminStats();
         renderWithdrawals();
+        renderNotifications();
     }
 
-    if(role==="researcher"){
+    if(role === "researcher"){
         renderSurveyProgress();
+        renderNotifications();
     }
 
-    if(role==="respondent"){
+    if(role === "respondent"){
         renderSurvey();
         renderHistory();
-    }    
-
-    let historyWrapper =
-    document.getElementById(
-        "historyWrapper"
-    );
-
-    if(historyWrapper){
-
-        if(isDark){
-
-            historyWrapper.classList.add(
-                "bg-slate-800",
-                "text-white"
-            );
-
-            historyWrapper.classList.remove(
-                "bg-white",
-                "text-slate-900"
-            );
-
-        }
-
-        else{
-
-            historyWrapper.classList.add(
-                "bg-white",
-                "text-slate-900"
-            );
-
-            historyWrapper.classList.remove(
-                "bg-slate-800",
-                "text-white"
-            );
-
-        }
-
+        renderNotifications();
     }
-    
+
 }
 
 function updateThemeButton(){
 
-    let btn =
-        document.getElementById(
-            "themeBtn"
-        );
-
+    let btn = document.getElementById("themeBtn");
     if(!btn) return;
 
-    let isDark =
-        document.body.classList.contains(
-            "dark"
-        );
-
-    btn.innerText =
-        isDark
-        ? "☀️ Light Mode"
-        : "🌙 Dark Mode";
+    let isDark = document.body.classList.contains("dark");
+    btn.innerText = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
 
 }
 
 function clearSurvey(){
-
-    localStorage.removeItem(
-        "surveys"
-    );
-
+    localStorage.removeItem("surveys");
     location.reload();
-
 }
+
+/* ====================================
+   SURVEY PROGRESS
+==================================== */
 
 function renderSurveyProgress(){
 
-    let container =
-        document.getElementById(
-            "surveyProgress"
-        );
-
+    let container = document.getElementById("surveyProgress");
     if(!container) return;
 
     container.innerHTML = "";
 
-    surveys.forEach(s=>{
+    surveys.forEach(s => {
 
-        let progress =
-            Math.round(
-                (
-                    s.current /
-                    s.count
-                ) * 100
-            );
+        let progress = Math.round((s.current / s.count) * 100);
 
         container.innerHTML += `
-
-        <div
-        class="border rounded-lg p-3 mb-3"
-        >
-
-            <h4
-            class="font-bold"
-            >
-                ${s.title}
-            </h4>
-
-            <p>
-                ${s.current}/${s.count}
-            </p>
-
-            <div
-            class="w-full bg-slate-300 h-2 rounded-full mt-2"
-            >
-
+        <div class="border rounded-lg p-3 mb-3">
+            <h4 class="font-bold">${s.title}</h4>
+            <p>${s.current}/${s.count}</p>
+            <div class="w-full bg-slate-300 h-2 rounded-full mt-2">
                 <div
-                class="
-                ${
-                    progress===100
-                    ? 'bg-emerald-500'
-                    : 'bg-indigo-500'
-                }
-                h-2
-                rounded-full
-                "
-                style="width:${progress}%"
-                >
-                </div>
-
+                    class="${progress === 100 ? 'bg-emerald-500' : 'bg-indigo-500'} h-2 rounded-full"
+                    style="width:${progress}%"
+                ></div>
             </div>
-
             <div class="mt-2">
-
-            <span
-            class="
-            px-3
-            py-1
-            rounded-full
-            text-xs
-            font-bold
-
-            ${
-                s.surveyStatus==="OPEN"
-                ? "bg-green-500 text-white"
-                : "bg-red-500 text-white"
-            }
-            "
-            >
-
-            ${s.surveyStatus}
-
-            </span>
-
-        </div>
-
-        </div>
-
-        `;
+                <span class="px-3 py-1 rounded-full text-xs font-bold
+                    ${s.surveyStatus === "OPEN" ? "bg-green-500 text-white" : "bg-red-500 text-white"}">
+                    ${s.surveyStatus}
+                </span>
+            </div>
+        </div>`;
 
     });
 
 }
 
+/* ====================================
+   ADMIN STATS
+==================================== */
+
 function renderAdminStats(){
-    
-    const darkMode =
 
-    document.body.classList.contains(
-        "dark"
-    );
+    const darkMode = document.body.classList.contains("dark");
 
-    const wrapper =
-
-    document.getElementById(
-        "businessWrapper"
-    );
-
+    const wrapper = document.getElementById("businessWrapper");
     if(wrapper){
-
         wrapper.className = darkMode
-
-        ? "bg-slate-800 text-white rounded-3xl p-8 shadow-lg"
-
-        : "bg-white text-slate-900 rounded-3xl p-8 shadow-lg";
-
+            ? "bg-slate-800 text-white rounded-3xl p-8 shadow-lg"
+            : "bg-white text-slate-900 rounded-3xl p-8 shadow-lg";
     }
 
-    const withdrawWrapper = 
-    document.getElementById(
-        "withdrawWrapper"
-    );
-
+    const withdrawWrapper = document.getElementById("withdrawWrapper");
     if(withdrawWrapper){
-        withdrawWrapper.className = darkMode 
-        ? "bg-slate-700 text-white rounded-3xl p-6 shadow-lg mt-6"
-        : "bg-slate-100 text-slate-900 rounded-3xl p-6 shadow-lg mt-6"
+        withdrawWrapper.className = darkMode
+            ? "bg-slate-700 text-white rounded-3xl p-6 shadow-lg mt-6"
+            : "bg-slate-100 text-slate-900 rounded-3xl p-6 shadow-lg mt-6";
     }
-    
 
-    const cardClass = darkMode
+    const cardClass    = darkMode ? "bg-slate-800 text-white" : "bg-white text-slate-900";
+    const subCardClass = darkMode ? "bg-slate-700 text-white rounded-2xl p-6" : "bg-slate-100 text-slate-900 rounded-2xl p-6";
 
-    ? "bg-slate-800 text-white"
+    let adminStats      = document.getElementById("adminStats");
+    let businessMetrics = document.getElementById("businessMetrics");
 
-    : "bg-white text-slate-900";
+    if(!adminStats || !businessMetrics) return;
 
-    const wrapperClass = darkMode
+    let revenue = Number(localStorage.getItem("revenue")) || 0;
 
-    ? "bg-slate-800 text-white"
-
-    : "bg-white text-slate-900";
-
-    const subCardClass = darkMode
-
-    ? "bg-slate-700 text-white rounded-2xl p-6"
-
-    : "bg-slate-100 text-slate-900 rounded-2xl p-6";
-
-
-
-    let adminStats =
-        document.getElementById(
-            "adminStats"
-        );
-
-    let businessMetrics =
-        document.getElementById(
-            "businessMetrics"
-        );
-
-    if(
-        !adminStats ||
-        !businessMetrics
-    ) return;
-
-    let revenue =
-        Number(
-            localStorage.getItem(
-                "revenue"
-            )
-        ) || 0;
-
-    let activeSurvey =
-        surveys.filter(
-            s =>
-            s.surveyStatus === "OPEN"
-        ).length;
-
-    let closedSurvey =
-        surveys.filter(
-            s =>
-            s.surveyStatus === "CLOSED"
-        ).length;
+    let activeSurvey = surveys.filter(s => s.surveyStatus === "OPEN").length;
+    let closedSurvey = surveys.filter(s => s.surveyStatus === "CLOSED").length;
 
     let totalInsentif = 0;
-
-    surveys.forEach(s=>{
-
-        totalInsentif +=
-            (
-                Number(
-                    s.current || 0
-                )
-                *
-                Number(
-                    s.insentif || 0
-                )
-            );
-
+    surveys.forEach(s => {
+        totalInsentif += Number(s.current || 0) * Number(s.insentif || 0);
     });
 
     adminStats.innerHTML = `
-
-        <div class="${cardClass} rounded-2xl p-5 shadow"
+        <div class="${cardClass} rounded-2xl p-5 shadow">
             <h3>Total Survey</h3>
-            <p class="text-3xl font-bold mt-2">
-                ${surveys.length}
-            </p>
+            <p class="text-3xl font-bold mt-2">${surveys.length}</p>
         </div>
-
-        <div class="${cardClass} rounded-2xl p-5 shadow"
+        <div class="${cardClass} rounded-2xl p-5 shadow">
             <h3>Survey Aktif</h3>
-            <p class="text-3xl font-bold mt-2">
-                ${activeSurvey}
-            </p>
+            <p class="text-3xl font-bold mt-2">${activeSurvey}</p>
         </div>
-
-        <div class="${cardClass} rounded-2xl p-5 shadow"
+        <div class="${cardClass} rounded-2xl p-5 shadow">
             <h3>Survey Selesai</h3>
-            <p class="text-3xl font-bold mt-2">
-                ${closedSurvey}
-            </p>
+            <p class="text-3xl font-bold mt-2">${closedSurvey}</p>
         </div>
-
-        <div class="${cardClass} rounded-2xl p-5 shadow"
+        <div class="${cardClass} rounded-2xl p-5 shadow">
             <h3>Revenue</h3>
-            <p class="text-3xl font-bold mt-2">
-                Rp ${revenue.toLocaleString("id-ID")}
-            </p>
-        </div>
-
-    `;
+            <p class="text-3xl font-bold mt-2">Rp ${revenue.toLocaleString("id-ID")}</p>
+        </div>`;
 
     businessMetrics.innerHTML = `
-
-
-        <div
-            <div class="${subCardClass}"
-        >
-
-            <h3
-                class="font-semibold mb-3"
-            >
-                 Statistik Pengguna
-            </h3>
-
-            <p>
-                Total User :
-                3
-            </p>
-
-            <p>
-                Survey Aktif :
-                ${activeSurvey}
-            </p>
-
-            <p>
-                Survey Selesai :
-                ${closedSurvey}
-            </p>
-
+        <div class="${subCardClass}">
+            <h3 class="font-semibold mb-3">📊 Statistik Pengguna</h3>
+            <p>Total User : 3</p>
+            <p>Survey Aktif : ${activeSurvey}</p>
+            <p>Survey Selesai : ${closedSurvey}</p>
         </div>
-
-        <div
-            <div class="${subCardClass}"
-        >
-
-            <h3
-                class="font-semibold mb-3"
-            >
-                 Statistik Keuangan
-            </h3>
-
-            <p>
-                Revenue :
-                Rp ${revenue.toLocaleString("id-ID")}
-            </p>
-
-            <p>
-                Total Insentif :
-                Rp ${totalInsentif.toLocaleString("id-ID")}
-            </p>
-
-        </div>
-
-    `;
+        <div class="${subCardClass}">
+            <h3 class="font-semibold mb-3">💰 Statistik Keuangan</h3>
+            <p>Revenue : Rp ${revenue.toLocaleString("id-ID")}</p>
+            <p>Total Insentif : Rp ${totalInsentif.toLocaleString("id-ID")}</p>
+        </div>`;
 
 }
+
+/* ====================================
+   TOGGLE SIDEBAR
+==================================== */
 
 function toggleSidebar(){
 
-    let sidebar =
-        document.getElementById(
-            "sidebar"
-        );
-
+    let sidebar = document.getElementById("sidebar");
     sidebar.classList.toggle("w-72");
     sidebar.classList.toggle("w-20");
 
-    document
-        .getElementById("logoText")
-        ?.classList.toggle("hidden");
+    document.getElementById("logoText")    ?.classList.toggle("hidden");
+    document.getElementById("sidebarDesc") ?.classList.toggle("hidden");
+    document.getElementById("walletbox")   ?.classList.toggle("hidden");
+    document.getElementById("line")        ?.classList.toggle("hidden");
+    document.getElementById("roleText")    ?.classList.toggle("hidden");
+    document.getElementById("logoutbox")   ?.classList.toggle("hidden");
 
-    document
-        .getElementById("sidebarDesc")
-        ?.classList.toggle("hidden");
-
-    document
-        .getElementById("walletbox")
-        ?.classList.toggle("hidden");
-
-    document
-        .getElementById("line")
-        ?.classList.toggle("hidden");
-
-    document
-        .getElementById("roleText")
-        ?.classList.toggle("hidden");        
-    
-    document
-        .getElementById("logoutbox")
-        ?.classList.toggle("hidden");    
 }
+
+/* ====================================
+   WITHDRAWALS
+==================================== */
 
 function renderWithdrawals(){
 
-    console.log(
-        "renderwithdrawals jalan"
-    );
-
-    let list =
-        document.getElementById(
-            "withdrawList"
-        );
-
+    let list = document.getElementById("withdrawList");
     if(!list) return;
 
     list.innerHTML = "";
 
     withdrawals =
+        JSON.parse(localStorage.getItem("withdrawals")) || [];
 
-    JSON.parse(
-        localStorage.getItem(
-            "withdrawals"
-        )
-    ) || [];
+    withdrawals.forEach((w, index) => {
 
-    withdrawals.forEach(
-
-        (w,index)=>{
-
-            list.innerHTML += `
-
-            <div
-                class="
-                border
-                rounded-xl
-                p-4
-                mb-3
-                "
-            >
-
-                <div
-                    class="
-                    flex
-                    justify-between
-                    items-center
-                    "
-                >
-
-                    <div>
-
-                        <p
-                        class="font-semibold"
-                        >
-                            Withdrawal Request
-                        </p>
-
-                        <p>
-                            Rp ${w.amount.toLocaleString("id-ID")}
-                        </p>
-
-                        <p
-                        class="text-sm text-gray-500"
-                        >
-                            ${w.status}
-                        </p>
-
-                    </div>
-
-                    ${
-                        w.status === "Pending"
-
-                        ?
-
-                        `
-                        <div
-                        class="flex gap-2"
-                        >
-
-                            <button
-                            onclick="approveWithdraw(${index})"
-                            class="
-                            bg-green-500
-                            text-white
-                            px-3
-                            py-2
-                            rounded-lg
-                            "
-                            >
+        list.innerHTML += `
+        <div class="border rounded-xl p-4 mb-3">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="font-semibold">Withdrawal Request</p>
+                    <p>Rp ${w.amount.toLocaleString("id-ID")}</p>
+                    <p class="text-sm text-gray-500">${w.status}</p>
+                </div>
+                ${
+                    w.status === "Pending"
+                    ? `<div class="flex gap-2">
+                            <button onclick="approveWithdraw(${index})"
+                                class="bg-green-500 text-white px-3 py-2 rounded-lg">
                                 Approve
                             </button>
-
-                            <button
-                            onclick="rejectWithdraw(${index})"
-                            class="
-                            bg-red-500
-                            text-white
-                            px-3
-                            py-2
-                            rounded-lg
-                            "
-                            >
+                            <button onclick="rejectWithdraw(${index})"
+                                class="bg-red-500 text-white px-3 py-2 rounded-lg">
                                 Reject
                             </button>
-
-                        </div>
-                        `
-
-                        :
-
-                        ""
-
-                    }
-
-                </div>
-
+                        </div>`
+                    : ""
+                }
             </div>
+        </div>`;
 
-            `;
-
-        }
-
-    );
+    });
 
 }
 
 function approveWithdraw(index){
 
-    if(
-        withdrawals[index].status !==
-        "Pending"
-    ){
-        return;
-    }
+    if(withdrawals[index].status !== "Pending") return;
 
-    withdrawals[index].status =
-        "Approved";
+    withdrawals[index].status = "Approved";
 
-    let walletVal =
+    let walletVal = Number(localStorage.getItem("wallet")) || 0;
+    walletVal    -= Number(withdrawals[index].amount);
 
-        Number(
-            localStorage.getItem(
-                "wallet"
-            )
-        ) || 0;
-
-    walletVal -=
-
-        Number(
-            withdrawals[index].amount
-        );
-
-    localStorage.setItem(
-
-        "wallet",
-
-        walletVal
-
-    );
-
-    localStorage.setItem(
-
-        "withdrawals",
-
-        JSON.stringify(
-            withdrawals
-        )
-
-    );
+    localStorage.setItem("wallet",      walletVal);
+    localStorage.setItem("withdrawals", JSON.stringify(withdrawals));
 
     renderWithdrawals();
-
     updateWallet();
+    showToast("Withdraw approved","success");
 
-    showToast(
-        "Withdraw approved",
-        "success"
+    addNotification(
+        `✅ Withdrawal Rp ${withdrawals[index].amount.toLocaleString("id-ID")} disetujui`
     );
+    renderNotifications();
 
 }
 
 function rejectWithdraw(index){
 
-    withdrawals[index].status =
-        "Rejected";
+    withdrawals[index].status = "Rejected";
 
-    localStorage.setItem(
-
-        "withdrawals",
-
-        JSON.stringify(
-            withdrawals
-        )
-
-    );
+    localStorage.setItem("withdrawals", JSON.stringify(withdrawals));
 
     renderWithdrawals();
+    showToast("Withdraw rejected","error");
 
-    showToast(
-        "Withdraw rejected",
-        "error"
+    addNotification(
+        `❌ Withdrawal Rp ${withdrawals[index].amount.toLocaleString("id-ID")} ditolak`
     );
+    renderNotifications();
+
+}
+
+/* ====================================
+   NOTIFICATIONS
+==================================== */
+
+function addNotification(message){
+
+    notifications.unshift({
+        message,
+        date: new Date().toLocaleString("id-ID")
+    });
+
+    localStorage.setItem("notifications", JSON.stringify(notifications));
+
+}
+
+function renderNotifications(){
+
+    // FIX: pakai querySelector agar tidak bergantung pada posisi elemen di DOM
+    let list = document.getElementById("notificationList");
+    if(!list) return;
+
+    list.innerHTML = "";
+
+    let data = JSON.parse(localStorage.getItem("notifications")) || [];
+
+    let notifCount = document.getElementById("notifCount");
+    if(notifCount){
+        notifCount.innerText = data.length;
+    }
+
+    if(data.length === 0){
+        list.innerHTML = `<p class="text-gray-500">Belum ada notifikasi</p>`;
+        return;
+    }
+
+    data.slice(0, 10).forEach(n => {
+        list.innerHTML += `
+        <div class="border-b border-slate-200 py-3">
+            <p>${n.message}</p>
+            <p class="text-xs text-gray-500">${n.date}</p>
+        </div>`;
+    });
 
 }
