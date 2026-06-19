@@ -15,8 +15,7 @@ let notifications =
 
 let fakeUsers = [
     { gender: "Male",   age: "18-22", status: "Mahasiswa" },
-    { gender: "Female", age: "23-30", status: "Pekerja"   },
-    { gender: "Male",   age: "23-30", status: "Mahasiswa" }
+    { gender: "Female", age: "23-30", status: "Pekerja"   }
 ];
 
 let withdrawals =
@@ -24,9 +23,6 @@ let withdrawals =
         localStorage.getItem("withdrawals")
     ) || [];
 
-/* ====================================
-   HELPER: apply dark/light to wrappers
-==================================== */
 
 function applyWrapperTheme(){
 
@@ -148,8 +144,7 @@ window.onload = function(){
     updateStats();
     renderSurveyProgress();
 
-    // FIX: renderNotifications dipanggil SEKALI di sini saja,
-    // tidak lagi dipanggil di dalam tiap blok role agar tidak spam
+    // FIX: renderNotifications only called once HERE, not in every block
     renderNotifications();
 
 };
@@ -450,8 +445,7 @@ function renderSurvey(){
         ){
             result++;
 
-            // FIX: pakai index asli dari array surveys (bukan index hasil sort)
-            // agar openSurveyModal/takeSurvey selalu merujuk survey yang benar
+            // FIX
             let realIndex = surveys.indexOf(s);
 
             let progress     = Math.round((s.current / s.count) * 100);
@@ -1242,7 +1236,7 @@ function addNotification(message){
 
 function renderNotifications(){
 
-    // FIX: pakai querySelector agar tidak bergantung pada posisi elemen di DOM
+    // FIX: querySelector used
     let list = document.getElementById("notificationList");
     if(!list) return;
 
