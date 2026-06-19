@@ -24,6 +24,7 @@ let withdrawals =
         localStorage.getItem("withdrawals")
     ) || [];
 
+
 function applyWrapperTheme(){
 
     let isDark =
@@ -139,7 +140,7 @@ window.onload = function(){
     updateStats();
     renderSurveyProgress();
 
-    
+    // FIX: renderNotifications only called once HERE, not in every block
     renderNotifications();
 
 };
@@ -396,7 +397,7 @@ function renderSurvey(){
     let sortedSurvey =
         [...surveys].sort((a,b) => Number(b.featured) - Number(a.featured));
 
-    sortedSurvey.forEach((s,i) => {
+    sortedSurvey.forEach((s) => {
 
         if(
             (s.surveyStatus === "OPEN") &&
@@ -407,6 +408,9 @@ function renderSurvey(){
             (s.title.toLowerCase().includes(keyword))
         ){
             result++;
+
+            // FIX
+            let realIndex = surveys.indexOf(s);
 
             let progress     = Math.round((s.current / s.count) * 100);
             let featuredBadge = s.featured
@@ -424,9 +428,8 @@ function renderSurvey(){
                         ${s.surveyStatus}
                     </span>
                 </div>
-                <p class="mt-2 text-sm">${s.description}</p>
+                <p class="mt-2 text-sm truncate">${s.description}</p>
                 <p class="mt-2">⏱ ${s.duration} menit</p>
-                <p>🎯 ${s.status}</p>
                 <p class="font-semibold mt-2">
                     Insentif : Rp ${Number(s.insentif).toLocaleString("id-ID")}
                 </p>
@@ -436,10 +439,10 @@ function renderSurvey(){
                 </div>
                 <p class="text-sm mt-1">${progress}%</p>
                 <button
-                    onclick="takeSurvey(${i})"
-                    class="mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
+                    onclick="openSurveyModal(${realIndex})"
+                    class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg w-full"
                 >
-                    Isi Survey
+                    Detail
                 </button>
             </div>`;
         }
@@ -480,6 +483,76 @@ function renderHistory(){
             <p class="text-xs text-gray-500">${h.date}</p>
         </div>`;
     });
+
+}
+
+let currentModalIndex = null;
+
+function openSurveyModal(i){
+
+    // Fix: modal Popup implemented
+    let s = surveys[i];
+    if(!s) return;
+
+    currentModalIndex = i;
+
+    let progress = Math.round((s.current / s.count) * 100);
+
+    modalTitle.innerText       = s.title;
+    modalDescription.innerText = s.description;
+    modalDuration.innerText    = s.duration + " menit";
+    modalInsentif.innerText    = "Rp " + Number(s.insentif).toLocaleString("id-ID");
+
+    let targetParts = [];
+    if(s.gender !== "All") targetParts.push(s.gender);
+    if(s.age    !== "All") targetParts.push(s.age);
+    if(s.status !== "All") targetParts.push(s.status);
+    modalTarget.innerText = targetParts.length ? targetParts.join(" • ") : "Semua Responden";
+
+    modalStatus.innerHTML = `
+        <span class="px-2 py-1 rounded-full text-xs font-bold
+            ${s.surveyStatus === "OPEN" ? "bg-green-500 text-white" : "bg-red-500 text-white"}">
+            ${s.surveyStatus}
+        </span>`;
+
+    modalFeaturedBadge.innerHTML = s.featured
+        ? `<span class="bg-yellow-400 text-black px-2 py-1 rounded-full text-xs font-bold">⭐ FEATURED</span>`
+        : "";
+
+    modalProgressLabel.innerText = `${s.current}/${s.count} (${progress}%)`;
+    modalProgressBar.style.width = progress + "%";
+
+    let takeBtn = document.getElementById("modalTakeSurveyBtn");
+    if(s.surveyStatus === "OPEN"){
+        takeBtn.disabled    = false;
+        takeBtn.classList.remove("opacity-50","cursor-not-allowed");
+        takeBtn.innerText   = "Isi Survey";
+    } else {
+        takeBtn.disabled    = true;
+        takeBtn.classList.add("opacity-50","cursor-not-allowed");
+        takeBtn.innerText   = "Survey Sudah Ditutup";
+    }
+
+    surveyModal.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+
+}
+
+function closeSurveyModal(){
+
+    surveyModal.classList.add("hidden");
+    document.body.style.overflow = "";
+    currentModalIndex = null;
+
+}
+
+function takeSurveyFromModal(){
+
+    if(currentModalIndex === null) return;
+
+    let index = currentModalIndex;
+    closeSurveyModal();
+    takeSurvey(index);
 
 }
 
@@ -864,6 +937,7 @@ function addNotification(message){
 
 function renderNotifications(){
 
+    // FIX: querySelector used
     let list = document.getElementById("notificationList");
     if(!list) return;
 
