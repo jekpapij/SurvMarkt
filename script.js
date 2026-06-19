@@ -15,8 +15,7 @@ let notifications =
 
 let fakeUsers = [
     { gender: "Male",   age: "18-22", status: "Mahasiswa" },
-    { gender: "Female", age: "23-30", status: "Pekerja"   },
-    { gender: "Male",   age: "23-30", status: "Mahasiswa" }
+    { gender: "Female", age: "23-30", status: "Pekerja"   }
 ];
 
 let withdrawals =
