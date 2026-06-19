@@ -85,12 +85,12 @@
 
 <body class="bg-slate-100">
 
-<!-- TOAST -->
+<!--TOAST-->
 <div id="toast" class="fixed top-5 right-5 hidden px-4 py-3 rounded-xl shadow-lg text-white z-50"></div>
 
 <div class="flex">
 
-    <!-- SIDEBAR -->
+    <!--SIDEBAR-->
     <aside
         id="sidebar"
         class="w-72 min-h-screen bg-indigo-600 text-white p-6 transition-all duration-300"
@@ -116,7 +116,7 @@
 
         <p id="roleText" class="font-semibold"></p>
 
-        <!-- WALLET -->
+        <!--WALLET-->
         <div id="walletbox" class="mt-6 bg-indigo-500 rounded-xl p-4 transition-all duration-300">
             <h3 class="font-semibold">Wallet</h3>
             <p id="wallet" class="text-xl font-bold mt-2"></p>
@@ -150,24 +150,24 @@
         </button>
     </aside>
 
-    <!-- MAIN CONTENT -->
+    <!--MAIN CONTENT-->
     <main class="flex-1 p-8">
 
-        <!-- HEADER -->
+        <!--HEADER-->
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-slate-800">SurvMarkt Dashboard</h1>
             <p class="text-slate-500 mt-2" id="dashboardSubtitle"></p>
         </div>
 
-        <!-- STATS -->
+        <!--STATS-->
         <div id="stats" class="grid grid-cols-4 gap-4 mb-8"></div>
 
-        <!-- ==================== RESEARCHER PANEL ==================== -->
+        <!--RESEARCHER PANEL-->
         <div id="researcherPanel" class="hidden">
 
             <div class="grid grid-cols-2 gap-6">
 
-                <!-- FORM SURVEY -->
+                <!--FORM SURVEY-->
                 <div class="bg-white rounded-2xl p-6 shadow transition hover:shadow-xl">
                     <h3 class="text-xl font-semibold mb-4">Buat Survey</h3>
                     <input id="titleSurvey" placeholder="Judul Survey" class="w-full border p-3 rounded-lg mb-3">
@@ -183,7 +183,7 @@
                     </div>
                 </div>
 
-                <!-- INSENTIF -->
+                <!--INSENTIF-->
                 <div class="bg-white rounded-2xl p-6 shadow transition hover:shadow-xl">
                     <h3 class="text-xl font-semibold mb-4">Insentif</h3>
                     <input id="insentif" type="number" placeholder="Rekomendasi Rp 1.000 - 5.000" class="w-full border p-3 rounded-lg mb-2">
@@ -199,7 +199,7 @@
                     </div>
                 </div>
 
-                <!-- FILTER -->
+                <!--FILTER-->
                 <div class="bg-white rounded-2xl p-6 shadow transition hover:shadow-xl">
                     <h3 class="text-xl font-semibold mb-4">Filter Responden</h3>
                     <select id="fGender" class="w-full border p-3 rounded-lg mb-3">
@@ -219,7 +219,7 @@
                     </select>
                 </div>
 
-                <!-- MATCHING -->
+                <!--MATCHING-->
                 <div class="bg-white rounded-2xl p-6 shadow transition hover:shadow-xl">
                     <h3 class="text-xl font-semibold mb-4">Matching Responden</h3>
                     <p id="match" class="mb-4"></p>
@@ -233,7 +233,7 @@
 
             </div>
 
-            <!-- PROGRESS SURVEY -->
+            <!--PROGRESS SURVEY-->
             <div class="bg-white rounded-2xl p-6 shadow mt-6">
                 <h3 class="text-xl font-semibold mb-4">Progress Survey</h3>
                 <p class="text-xs text-slate-400 mb-3">Klik salah satu survey untuk kelola (pause/resume/hapus)</p>
@@ -241,12 +241,12 @@
             </div>
 
         </div>
-        <!-- END researcherPanel -->
+        <!--ENDOFresearcherPanel-->
 
-        <!-- ==================== RESPONDENT PANEL ==================== -->
+        <!--RESPONDENT PANEL-->
         <div id="respondentPanel" class="hidden">
 
-            <!-- FILTER -->
+            <!--FILTER-->
             <div class="bg-white rounded-2xl p-6 shadow mb-6">
                 <label class="font-semibold">Cari Survey</label>
                 <input
@@ -273,41 +273,41 @@
                 <p id="resultCount" class="mt-3 text-sm text-gray-500"></p>
             </div>
 
-            <!-- LIST SURVEY -->
+            <!--LIST SURVEY-->
             <div id="surveyList" class="grid grid-cols-2 gap-4"></div>
 
             <div id="emptyState" class="hidden text-center py-20">
                 <p class="mt-3 text-slate-400">Tidak ada survey sesuai filter</p>
             </div>
 
-            <!-- RIWAYAT SURVEY -->
+            <!--RIWAYAT SURVEY-->
             <div id="historyWrapper" class="mt-8 rounded-2xl p-6 shadow bg-white">
                 <h2 class="text-xl font-bold mb-4">📜 Riwayat Survey</h2>
                 <div id="historyList"></div>
             </div>
 
         </div>
-        <!-- END respondentPanel -->
+        <!--ENDOFrespondentPanel-->
 
-        <!-- ==================== ADMIN PANEL ==================== -->
+        <!--ADMIN PANEL-->
         <div id="adminPanel" class="hidden">
 
-            <!-- ADMIN STATS -->
+            <!--ADMIN STATS-->
             <div id="adminStats" class="grid grid-cols-4 gap-4 mb-8"></div>
 
-            <!-- BUSINESS METRICS -->
+            <!--BUSINESS METRICS-->
             <div id="businessWrapper" class="rounded-3xl p-8 shadow-lg bg-white">
                 <h2 class="text-2xl font-bold mb-6">📈 Business Metrics</h2>
                 <div id="businessMetrics" class="grid grid-cols-2 gap-6"></div>
             </div>
 
-            <!-- WITHDRAWAL REQUESTS -->
+            <!--WITHDRAWAL REQUESTS-->
             <div id="withdrawWrapper" class="rounded-3xl p-6 shadow-lg mt-6 bg-slate-100">
                 <h2 class="text-2xl font-bold mb-4">Withdrawal Requests</h2>
                 <div id="withdrawList"></div>
             </div>
 
-            <!-- SURVEY TERHAPUS (SOFT DELETE) -->
+            <!--SURVEY TERHAPUS (SOFT DELETE)-->
             <div id="deletedWrapper" class="rounded-3xl p-6 shadow-lg mt-6 bg-slate-100">
                 <h2 class="text-2xl font-bold mb-4">🗑 Survey Terhapus</h2>
                 <p class="text-xs text-slate-400 mb-4">
@@ -317,9 +317,9 @@
             </div>
 
         </div>
-        <!-- END adminPanel -->
+        <!--ENDOFadminPanel-->
 
-        <!-- ==================== NOTIFICATIONS ==================== -->
+        <!--NOTIFICATIONS-->
         <div id="notificationWrapper" class="mt-8 rounded-2xl p-6 shadow bg-white">
             <h2 class="text-xl font-bold mb-4">🔔 Notifications</h2>
             <div id="notificationList"></div>
@@ -329,7 +329,7 @@
 
 </div>
 
-<!-- ==================== SURVEY DETAIL MODAL ==================== -->
+<!--SURVEY DETAIL MODAL-->
 <div
     id="surveyModal"
     class="hidden fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4"
@@ -400,7 +400,7 @@
     </div>
 </div>
 
-<!-- ==================== RESEARCHER MANAGE SURVEY MODAL ==================== -->
+<!--RESEARCHER MANAGE SURVEY MODAL-->
 <div
     id="researcherSurveyModal"
     class="hidden fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4"
