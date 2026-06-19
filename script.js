@@ -24,6 +24,10 @@ let withdrawals =
         localStorage.getItem("withdrawals")
     ) || [];
 
+/* ====================================
+   HELPER: apply dark/light to wrappers
+==================================== */
+
 function applyWrapperTheme(){
 
     let isDark =
@@ -56,6 +60,10 @@ function applyWrapperTheme(){
     }
 
 }
+
+/* ====================================
+   WINDOW ONLOAD
+==================================== */
 
 window.onload = function(){
 
@@ -132,6 +140,7 @@ window.onload = function(){
 
         renderAdminStats();
         renderWithdrawals();
+        renderDeletedSurveys();
 
     }
 
@@ -139,10 +148,15 @@ window.onload = function(){
     updateStats();
     renderSurveyProgress();
 
-    
+    // FIX: renderNotifications dipanggil SEKALI di sini saja,
+    // tidak lagi dipanggil di dalam tiap blok role agar tidak spam
     renderNotifications();
 
 };
+
+/* ====================================
+   TOAST
+==================================== */
 
 function showToast(msg, type = "info"){
 
@@ -168,6 +182,10 @@ function showToast(msg, type = "info"){
 
 }
 
+/* ====================================
+   WALLET
+==================================== */
+
 function updateWallet(){
 
     wallet.innerText =
@@ -177,6 +195,10 @@ function updateWallet(){
         ).toLocaleString("id-ID");
 
 }
+
+/* ====================================
+   PENELITI
+==================================== */
 
 function deposit(){
 
@@ -203,6 +225,10 @@ function deposit(){
     renderNotifications();
 
 }
+
+/* ====================================
+   RESPONDEN
+==================================== */
 
 function withdraw(){
 
@@ -232,6 +258,10 @@ function withdraw(){
 
 }
 
+/* ====================================
+   LOGOUT
+==================================== */
+
 function logout(){
     localStorage.removeItem("role");
     localStorage.removeItem("gender");
@@ -239,6 +269,10 @@ function logout(){
     localStorage.removeItem("status");
     window.location.href = "index.html";
 }
+
+/* ====================================
+   KALKULATOR INSENTIF
+==================================== */
 
 if(document.getElementById("insentif")){
     insentif.addEventListener("input", calc);
@@ -295,6 +329,10 @@ function calc(){
     }
 
 }
+
+/* ====================================
+   CREATE SURVEY
+==================================== */
 
 function createSurvey(){
 
@@ -372,6 +410,10 @@ function createSurvey(){
 
 }
 
+/* ====================================
+   FILTER RESPONDEN
+==================================== */
+
 function resetFilter(){
     minPrice.value = "";
     renderSurvey();
@@ -396,7 +438,7 @@ function renderSurvey(){
     let sortedSurvey =
         [...surveys].sort((a,b) => Number(b.featured) - Number(a.featured));
 
-    sortedSurvey.forEach((s,i) => {
+    sortedSurvey.forEach((s) => {
 
         if(
             (s.surveyStatus === "OPEN") &&
@@ -407,6 +449,10 @@ function renderSurvey(){
             (s.title.toLowerCase().includes(keyword))
         ){
             result++;
+
+            // FIX: pakai index asli dari array surveys (bukan index hasil sort)
+            // agar openSurveyModal/takeSurvey selalu merujuk survey yang benar
+            let realIndex = surveys.indexOf(s);
 
             let progress     = Math.round((s.current / s.count) * 100);
             let featuredBadge = s.featured
@@ -424,9 +470,8 @@ function renderSurvey(){
                         ${s.surveyStatus}
                     </span>
                 </div>
-                <p class="mt-2 text-sm">${s.description}</p>
+                <p class="mt-2 text-sm truncate">${s.description}</p>
                 <p class="mt-2">⏱ ${s.duration} menit</p>
-                <p>🎯 ${s.status}</p>
                 <p class="font-semibold mt-2">
                     Insentif : Rp ${Number(s.insentif).toLocaleString("id-ID")}
                 </p>
@@ -436,10 +481,10 @@ function renderSurvey(){
                 </div>
                 <p class="text-sm mt-1">${progress}%</p>
                 <button
-                    onclick="takeSurvey(${i})"
-                    class="mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
+                    onclick="openSurveyModal(${realIndex})"
+                    class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg w-full"
                 >
-                    Isi Survey
+                    Detail
                 </button>
             </div>`;
         }
@@ -482,6 +527,237 @@ function renderHistory(){
     });
 
 }
+
+/* ====================================
+   SURVEY DETAIL MODAL
+==================================== */
+
+let currentModalIndex = null;
+
+function openSurveyModal(i){
+
+    let s = surveys[i];
+    if(!s) return;
+
+    currentModalIndex = i;
+
+    let progress = Math.round((s.current / s.count) * 100);
+
+    modalTitle.innerText       = s.title;
+    modalDescription.innerText = s.description;
+    modalDuration.innerText    = s.duration + " menit";
+    modalInsentif.innerText    = "Rp " + Number(s.insentif).toLocaleString("id-ID");
+
+    let targetParts = [];
+    if(s.gender !== "All") targetParts.push(s.gender);
+    if(s.age    !== "All") targetParts.push(s.age);
+    if(s.status !== "All") targetParts.push(s.status);
+    modalTarget.innerText = targetParts.length ? targetParts.join(" • ") : "Semua Responden";
+
+    modalStatus.innerHTML = `
+        <span class="px-2 py-1 rounded-full text-xs font-bold
+            ${s.surveyStatus === "OPEN" ? "bg-green-500 text-white" : "bg-red-500 text-white"}">
+            ${s.surveyStatus}
+        </span>`;
+
+    modalFeaturedBadge.innerHTML = s.featured
+        ? `<span class="bg-yellow-400 text-black px-2 py-1 rounded-full text-xs font-bold">⭐ FEATURED</span>`
+        : "";
+
+    modalProgressLabel.innerText = `${s.current}/${s.count} (${progress}%)`;
+    modalProgressBar.style.width = progress + "%";
+
+    let takeBtn = document.getElementById("modalTakeSurveyBtn");
+    if(s.surveyStatus === "OPEN"){
+        takeBtn.disabled    = false;
+        takeBtn.classList.remove("opacity-50","cursor-not-allowed");
+        takeBtn.innerText   = "Isi Survey";
+    } else {
+        takeBtn.disabled    = true;
+        takeBtn.classList.add("opacity-50","cursor-not-allowed");
+        takeBtn.innerText   = "Survey Sudah Ditutup";
+    }
+
+    surveyModal.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+
+}
+
+function closeSurveyModal(){
+
+    surveyModal.classList.add("hidden");
+    document.body.style.overflow = "";
+    currentModalIndex = null;
+
+}
+
+function takeSurveyFromModal(){
+
+    if(currentModalIndex === null) return;
+
+    let index = currentModalIndex;
+    closeSurveyModal();
+    takeSurvey(index);
+
+}
+
+/* ====================================
+   RESEARCHER: MANAGE SURVEY MODAL
+   (Pause / Resume / Delete)
+==================================== */
+
+let currentResearcherModalIndex = null;
+
+function openResearcherSurveyModal(i){
+
+    let s = surveys[i];
+    if(!s) return;
+
+    currentResearcherModalIndex = i;
+
+    let progress = Math.round((s.current / s.count) * 100);
+
+    rModalTitle.innerText       = s.title;
+    rModalDescription.innerText = s.description;
+    rModalDuration.innerText    = s.duration + " menit";
+    rModalInsentif.innerText    = "Rp " + Number(s.insentif).toLocaleString("id-ID");
+
+    let targetParts = [];
+    if(s.gender !== "All") targetParts.push(s.gender);
+    if(s.age    !== "All") targetParts.push(s.age);
+    if(s.status !== "All") targetParts.push(s.status);
+    rModalTarget.innerText = targetParts.length ? targetParts.join(" • ") : "Semua Responden";
+
+    let statusBadgeClass =
+        s.surveyStatus === "OPEN"   ? "bg-green-500 text-white"  :
+        s.surveyStatus === "PAUSED" ? "bg-yellow-500 text-white" :
+                                       "bg-red-500 text-white";
+
+    rModalStatus.innerHTML = `
+        <span class="px-2 py-1 rounded-full text-xs font-bold ${statusBadgeClass}">
+            ${s.surveyStatus}
+        </span>`;
+
+    rModalProgressLabel.innerText = `${s.current}/${s.count} (${progress}%)`;
+    rModalProgressBar.style.width = progress + "%";
+
+    // Tombol aksi disusun sesuai restriksi:
+    // OPEN   -> bisa Pause
+    // PAUSED -> bisa Resume
+    // CLOSED -> tidak bisa pause/resume (final state)
+    // Delete selalu tersedia selama belum DELETED
+    let actionsHTML = "";
+
+    if(s.surveyStatus === "OPEN"){
+        actionsHTML += `
+            <button
+                onclick="pauseSurvey(${i})"
+                class="w-full bg-yellow-500 hover:bg-yellow-600 transition text-white py-3 rounded-lg font-semibold"
+            >
+                ⏸ Pause Survey
+            </button>`;
+    }
+    else if(s.surveyStatus === "PAUSED"){
+        actionsHTML += `
+            <button
+                onclick="resumeSurvey(${i})"
+                class="w-full bg-green-500 hover:bg-green-600 transition text-white py-3 rounded-lg font-semibold"
+            >
+                ▶️ Resume Survey
+            </button>`;
+    }
+    else if(s.surveyStatus === "CLOSED"){
+        actionsHTML += `
+            <p class="text-sm text-center text-gray-500 py-2">
+                Survey sudah selesai (target tercapai) dan tidak bisa di-pause/resume lagi.
+            </p>`;
+    }
+
+    actionsHTML += `
+        <button
+            onclick="deleteSurvey(${i})"
+            class="w-full bg-red-500 hover:bg-red-600 transition text-white py-3 rounded-lg font-semibold"
+        >
+            🗑 Hapus Survey
+        </button>`;
+
+    rModalActions.innerHTML = actionsHTML;
+
+    researcherSurveyModal.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+
+}
+
+function closeResearcherSurveyModal(){
+
+    researcherSurveyModal.classList.add("hidden");
+    document.body.style.overflow = "";
+    currentResearcherModalIndex = null;
+
+}
+
+function pauseSurvey(i){
+
+    let s = surveys[i];
+    if(!s || s.surveyStatus !== "OPEN") return;
+
+    s.surveyStatus = "PAUSED";
+    localStorage.setItem("surveys", JSON.stringify(surveys));
+
+    closeResearcherSurveyModal();
+    renderSurveyProgress();
+    updateStats();
+
+    showToast(`Survey "${s.title}" dipause`, "info");
+    addNotification(`⏸ Survey "${s.title}" dipause`);
+    renderNotifications();
+
+}
+
+function resumeSurvey(i){
+
+    let s = surveys[i];
+    if(!s || s.surveyStatus !== "PAUSED") return;
+
+    s.surveyStatus = "OPEN";
+    localStorage.setItem("surveys", JSON.stringify(surveys));
+
+    closeResearcherSurveyModal();
+    renderSurveyProgress();
+    updateStats();
+
+    showToast(`Survey "${s.title}" dilanjutkan`, "success");
+    addNotification(`▶️ Survey "${s.title}" dilanjutkan`);
+    renderNotifications();
+
+}
+
+function deleteSurvey(i){
+
+    let s = surveys[i];
+    if(!s || s.surveyStatus === "DELETED") return;
+
+    let confirmDelete = confirm(
+        `Hapus survey "${s.title}"?\n\nSurvey akan disembunyikan dari dashboard peneliti & responden, namun data tetap tersimpan untuk histori admin (soft delete).`
+    );
+    if(!confirmDelete) return;
+
+    s.surveyStatus = "DELETED";
+    localStorage.setItem("surveys", JSON.stringify(surveys));
+
+    closeResearcherSurveyModal();
+    renderSurveyProgress();
+    updateStats();
+
+    showToast(`Survey "${s.title}" dihapus`, "error");
+    addNotification(`🗑 Survey "${s.title}" dihapus`);
+    renderNotifications();
+
+}
+
+/* ====================================
+   TAKE SURVEY
+==================================== */
 
 function takeSurvey(i){
 
@@ -534,21 +810,30 @@ function takeSurvey(i){
 
 }
 
+/* ====================================
+   STATS
+==================================== */
+
 function updateStats(){
 
     let role = localStorage.getItem("role");
 
     if(role === "researcher"){
 
-        let totalSurvey = surveys.length;
-
+        // Total Spent tetap dihitung dari SEMUA survey (termasuk yang sudah dihapus)
+        // karena uangnya sudah terlanjur dipotong dari wallet saat createSurvey.
         let totalSpent = surveys.reduce((acc,s) => {
             let subtotal = s.count * s.insentif;
             let fee      = subtotal * 0.20;
             return acc + subtotal + fee;
         }, 0);
 
-        let totalRespondent = surveys.reduce((acc,s) => acc + Number(s.count), 0);
+        // Survey yang DELETED tidak dihitung di Total Survey & Target Responden
+        // karena dari sudut pandang peneliti, survey itu sudah "tidak ada".
+        let visibleSurveys = surveys.filter(s => s.surveyStatus !== "DELETED");
+
+        let totalSurvey      = visibleSurveys.length;
+        let totalRespondent  = visibleSurveys.reduce((acc,s) => acc + Number(s.count), 0);
 
         stats.innerHTML = `
             <div class="bg-white p-4 rounded-xl shadow">
@@ -607,6 +892,10 @@ function updateStats(){
 
 }
 
+/* ====================================
+   DARK MODE
+==================================== */
+
 function toggleTheme(){
 
     document.body.classList.toggle("dark");
@@ -623,6 +912,7 @@ function toggleTheme(){
     if(role === "admin"){
         renderAdminStats();
         renderWithdrawals();
+        renderDeletedSurveys();
         renderNotifications();
     }
 
@@ -654,6 +944,10 @@ function clearSurvey(){
     location.reload();
 }
 
+/* ====================================
+   SURVEY PROGRESS
+==================================== */
+
 function renderSurveyProgress(){
 
     let container = document.getElementById("surveyProgress");
@@ -661,12 +955,29 @@ function renderSurveyProgress(){
 
     container.innerHTML = "";
 
-    surveys.forEach(s => {
+    // Survey yang DELETED tidak ditampilkan di dashboard peneliti
+    let visibleSurveys = surveys.filter(s => s.surveyStatus !== "DELETED");
 
-        let progress = Math.round((s.current / s.count) * 100);
+    if(visibleSurveys.length === 0){
+        container.innerHTML = `<p class="text-gray-500">Belum ada survey</p>`;
+        return;
+    }
+
+    visibleSurveys.forEach(s => {
+
+        let realIndex = surveys.indexOf(s);
+        let progress  = Math.round((s.current / s.count) * 100);
+
+        let statusBadgeClass =
+            s.surveyStatus === "OPEN"   ? "bg-green-500 text-white"  :
+            s.surveyStatus === "PAUSED" ? "bg-yellow-500 text-white" :
+                                           "bg-red-500 text-white";
 
         container.innerHTML += `
-        <div class="border rounded-lg p-3 mb-3">
+        <div
+            onclick="openResearcherSurveyModal(${realIndex})"
+            class="border rounded-lg p-3 mb-3 cursor-pointer hover:bg-slate-50 transition"
+        >
             <h4 class="font-bold">${s.title}</h4>
             <p>${s.current}/${s.count}</p>
             <div class="w-full bg-slate-300 h-2 rounded-full mt-2">
@@ -676,8 +987,7 @@ function renderSurveyProgress(){
                 ></div>
             </div>
             <div class="mt-2">
-                <span class="px-3 py-1 rounded-full text-xs font-bold
-                    ${s.surveyStatus === "OPEN" ? "bg-green-500 text-white" : "bg-red-500 text-white"}">
+                <span class="px-3 py-1 rounded-full text-xs font-bold ${statusBadgeClass}">
                     ${s.surveyStatus}
                 </span>
             </div>
@@ -686,6 +996,10 @@ function renderSurveyProgress(){
     });
 
 }
+
+/* ====================================
+   ADMIN STATS
+==================================== */
 
 function renderAdminStats(){
 
@@ -715,18 +1029,22 @@ function renderAdminStats(){
 
     let revenue = Number(localStorage.getItem("revenue")) || 0;
 
-    let activeSurvey = surveys.filter(s => s.surveyStatus === "OPEN").length;
-    let closedSurvey = surveys.filter(s => s.surveyStatus === "CLOSED").length;
+    // Survey DELETED tidak dihitung di statistik normal — ditampilkan terpisah
+    let activeSurveysList = surveys.filter(s => s.surveyStatus !== "DELETED");
+
+    let activeSurvey = activeSurveysList.filter(s => s.surveyStatus === "OPEN").length;
+    let pausedSurvey = activeSurveysList.filter(s => s.surveyStatus === "PAUSED").length;
+    let closedSurvey = activeSurveysList.filter(s => s.surveyStatus === "CLOSED").length;
 
     let totalInsentif = 0;
-    surveys.forEach(s => {
+    activeSurveysList.forEach(s => {
         totalInsentif += Number(s.current || 0) * Number(s.insentif || 0);
     });
 
     adminStats.innerHTML = `
         <div class="${cardClass} rounded-2xl p-5 shadow">
             <h3>Total Survey</h3>
-            <p class="text-3xl font-bold mt-2">${surveys.length}</p>
+            <p class="text-3xl font-bold mt-2">${activeSurveysList.length}</p>
         </div>
         <div class="${cardClass} rounded-2xl p-5 shadow">
             <h3>Survey Aktif</h3>
@@ -746,6 +1064,7 @@ function renderAdminStats(){
             <h3 class="font-semibold mb-3">📊 Statistik Pengguna</h3>
             <p>Total User : 3</p>
             <p>Survey Aktif : ${activeSurvey}</p>
+            <p>Survey Dipause : ${pausedSurvey}</p>
             <p>Survey Selesai : ${closedSurvey}</p>
         </div>
         <div class="${subCardClass}">
@@ -755,6 +1074,57 @@ function renderAdminStats(){
         </div>`;
 
 }
+
+/* ====================================
+   ADMIN: SURVEY TERHAPUS (SOFT DELETE)
+==================================== */
+
+function renderDeletedSurveys(){
+
+    let list = document.getElementById("deletedList");
+    if(!list) return;
+
+    const darkMode = document.body.classList.contains("dark");
+
+    const deletedWrapper = document.getElementById("deletedWrapper");
+    if(deletedWrapper){
+        deletedWrapper.className = darkMode
+            ? "bg-slate-700 text-white rounded-3xl p-6 shadow-lg mt-6"
+            : "bg-slate-100 text-slate-900 rounded-3xl p-6 shadow-lg mt-6";
+    }
+
+    list.innerHTML = "";
+
+    let deletedSurveys = surveys.filter(s => s.surveyStatus === "DELETED");
+
+    if(deletedSurveys.length === 0){
+        list.innerHTML = `<p class="text-gray-500">Belum ada survey yang dihapus</p>`;
+        return;
+    }
+
+    deletedSurveys.forEach(s => {
+
+        list.innerHTML += `
+        <div class="border rounded-xl p-4 mb-3 opacity-75">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="font-semibold">${s.title}</p>
+                    <p class="text-sm text-gray-500">Progress terakhir: ${s.current}/${s.count}</p>
+                    <p class="text-sm text-gray-500">Insentif: Rp ${Number(s.insentif).toLocaleString("id-ID")}</p>
+                </div>
+                <span class="bg-slate-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                    🗑 DELETED
+                </span>
+            </div>
+        </div>`;
+
+    });
+
+}
+
+/* ====================================
+   TOGGLE SIDEBAR
+==================================== */
 
 function toggleSidebar(){
 
@@ -770,6 +1140,10 @@ function toggleSidebar(){
     document.getElementById("logoutbox")   ?.classList.toggle("hidden");
 
 }
+
+/* ====================================
+   WITHDRAWALS
+==================================== */
 
 function renderWithdrawals(){
 
@@ -851,6 +1225,10 @@ function rejectWithdraw(index){
 
 }
 
+/* ====================================
+   NOTIFICATIONS
+==================================== */
+
 function addNotification(message){
 
     notifications.unshift({
@@ -864,6 +1242,7 @@ function addNotification(message){
 
 function renderNotifications(){
 
+    // FIX: pakai querySelector agar tidak bergantung pada posisi elemen di DOM
     let list = document.getElementById("notificationList");
     if(!list) return;
 

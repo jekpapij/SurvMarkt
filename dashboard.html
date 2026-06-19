@@ -67,6 +67,18 @@
     background:#1e293b !important;
     color:white !important;
 }
+.dark #surveyModalBox{
+    background:#1e293b !important;
+    color:white !important;
+}
+.dark #modalDuration,
+.dark #modalTarget,
+.dark #modalStatus{
+    color:white !important;
+}
+.dark .modal-subcard{
+    background:#334155 !important;
+}
 
 </style>
 </head>
@@ -224,6 +236,7 @@
             <!-- PROGRESS SURVEY -->
             <div class="bg-white rounded-2xl p-6 shadow mt-6">
                 <h3 class="text-xl font-semibold mb-4">Progress Survey</h3>
+                <p class="text-xs text-slate-400 mb-3">Klik salah satu survey untuk kelola (pause/resume/hapus)</p>
                 <div id="surveyProgress"></div>
             </div>
 
@@ -294,6 +307,15 @@
                 <div id="withdrawList"></div>
             </div>
 
+            <!-- SURVEY TERHAPUS (SOFT DELETE) -->
+            <div id="deletedWrapper" class="rounded-3xl p-6 shadow-lg mt-6 bg-slate-100">
+                <h2 class="text-2xl font-bold mb-4">🗑 Survey Terhapus</h2>
+                <p class="text-xs text-slate-400 mb-4">
+                    Survey yang dihapus peneliti tetap tersimpan di sini untuk keperluan audit, namun tidak tampil di dashboard peneliti maupun responden.
+                </p>
+                <div id="deletedList"></div>
+            </div>
+
         </div>
         <!-- END adminPanel -->
 
@@ -305,6 +327,140 @@
 
     </main>
 
+</div>
+
+<!-- ==================== SURVEY DETAIL MODAL ==================== -->
+<div
+    id="surveyModal"
+    class="hidden fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4"
+    onclick="if(event.target===this) closeSurveyModal()"
+>
+    <div
+        id="surveyModalBox"
+        class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-y-auto"
+    >
+        <div class="p-6">
+
+            <div class="flex justify-between items-start mb-4">
+                <h2 id="modalTitle" class="text-2xl font-bold pr-4"></h2>
+                <button
+                    onclick="closeSurveyModal()"
+                    class="text-slate-400 hover:text-slate-700 text-2xl leading-none"
+                >
+                    &times;
+                </button>
+            </div>
+
+            <div id="modalFeaturedBadge" class="mb-3"></div>
+
+            <p id="modalDescription" class="text-sm mb-5"></p>
+
+            <div class="grid grid-cols-2 gap-4 mb-5">
+                <div class="modal-subcard bg-slate-100 rounded-xl p-4">
+                    <p class="text-xs text-slate-500">⏱ Durasi</p>
+                    <p id="modalDuration" class="font-bold text-lg mt-1"></p>
+                </div>
+                <div class="modal-subcard bg-slate-100 rounded-xl p-4">
+                    <p class="text-xs text-slate-500">💰 Insentif</p>
+                    <p id="modalInsentif" class="font-bold text-lg mt-1 text-indigo-600"></p>
+                </div>
+                <div class="modal-subcard bg-slate-100 rounded-xl p-4">
+                    <p class="text-xs text-slate-500">🎯 Target</p>
+                    <p id="modalTarget" class="font-semibold text-sm mt-1"></p>
+                </div>
+                <div class="modal-subcard bg-slate-100 rounded-xl p-4">
+                    <p class="text-xs text-slate-500">📊 Status</p>
+                    <p id="modalStatus" class="font-semibold text-sm mt-1"></p>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <div class="flex justify-between text-sm mb-1">
+                    <span>Progress</span>
+                    <span id="modalProgressLabel"></span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-3">
+                    <div
+                        id="modalProgressBar"
+                        class="bg-green-500 h-3 rounded-full transition-all"
+                        style="width:0%"
+                    ></div>
+                </div>
+            </div>
+
+            <button
+                id="modalTakeSurveyBtn"
+                onclick="takeSurveyFromModal()"
+                class="w-full bg-green-500 hover:bg-green-600 transition text-white py-3 rounded-lg font-semibold"
+            >
+                Isi Survey
+            </button>
+
+        </div>
+    </div>
+</div>
+
+<!-- ==================== RESEARCHER MANAGE SURVEY MODAL ==================== -->
+<div
+    id="researcherSurveyModal"
+    class="hidden fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4"
+    onclick="if(event.target===this) closeResearcherSurveyModal()"
+>
+    <div
+        id="researcherSurveyModalBox"
+        class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-y-auto"
+    >
+        <div class="p-6">
+
+            <div class="flex justify-between items-start mb-4">
+                <h2 id="rModalTitle" class="text-2xl font-bold pr-4"></h2>
+                <button
+                    onclick="closeResearcherSurveyModal()"
+                    class="text-slate-400 hover:text-slate-700 text-2xl leading-none"
+                >
+                    &times;
+                </button>
+            </div>
+
+            <p id="rModalDescription" class="text-sm mb-5"></p>
+
+            <div class="grid grid-cols-2 gap-4 mb-5">
+                <div class="modal-subcard bg-slate-100 rounded-xl p-4">
+                    <p class="text-xs text-slate-500">⏱ Durasi</p>
+                    <p id="rModalDuration" class="font-bold text-lg mt-1"></p>
+                </div>
+                <div class="modal-subcard bg-slate-100 rounded-xl p-4">
+                    <p class="text-xs text-slate-500">💰 Insentif</p>
+                    <p id="rModalInsentif" class="font-bold text-lg mt-1 text-indigo-600"></p>
+                </div>
+                <div class="modal-subcard bg-slate-100 rounded-xl p-4">
+                    <p class="text-xs text-slate-500">🎯 Target</p>
+                    <p id="rModalTarget" class="font-semibold text-sm mt-1"></p>
+                </div>
+                <div class="modal-subcard bg-slate-100 rounded-xl p-4">
+                    <p class="text-xs text-slate-500">📊 Status</p>
+                    <p id="rModalStatus" class="font-semibold text-sm mt-1"></p>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <div class="flex justify-between text-sm mb-1">
+                    <span>Progress</span>
+                    <span id="rModalProgressLabel"></span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-3">
+                    <div
+                        id="rModalProgressBar"
+                        class="bg-indigo-500 h-3 rounded-full transition-all"
+                        style="width:0%"
+                    ></div>
+                </div>
+            </div>
+
+            <div id="rModalActions" class="space-y-2"></div>
+
+        </div>
+    </div>
 </div>
 
 <script src="script.js"></script>
