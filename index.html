@@ -82,7 +82,6 @@ function login(){
     localStorage.setItem("age",    ageVal);
     localStorage.setItem("status", document.getElementById("status").value);
 
-    // Wallet default — hanya dibuat sekali
     if(!localStorage.getItem("wallet")){
         localStorage.setItem("wallet", 100000);
     }
