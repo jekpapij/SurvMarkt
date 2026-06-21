@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SurvMarkt — Marketplace Responden Penelitian</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+    --indigo-900: #312E81;
+    --indigo-600: #4F46E5;
+    --indigo-50:  #EEF2FF;
+    --amber-500:  #F59E0B;
+    --amber-50:   #FFFBEB;
+    --slate-900:  #0F172A;
+}
+
+*{
+    font-family: 'Inter', sans-serif;
+}
+
+.font-display{
+    font-family: 'Lora', serif;
+}
+
+.font-mono{
+    font-family: 'JetBrains Mono', monospace;
+}
+
+body{
+    background: var(--indigo-50);
+    color: var(--slate-900);
+}
+
+/* Hero background texture */
+.hero-bg{
+    background:
+        radial-gradient(circle at 15% 20%, rgba(79,70,229,0.10) 0%, transparent 45%),
+        radial-gradient(circle at 85% 10%, rgba(245,158,11,0.12) 0%, transparent 40%),
+        linear-gradient(180deg, #FFFFFF 0%, var(--indigo-50) 100%);
+}
+
+/* Exchange card hover lift */
+.exchange-card{
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+.exchange-card:hover{
+    transform: translateY(-6px);
+}
+
+/* Animated exchange arrows */
+@keyframes pulse-right{
+    0%, 100% { transform: translateX(0); opacity: 0.4; }
+    50% { transform: translateX(6px); opacity: 1; }
+}
+@keyframes pulse-left{
+    0%, 100% { transform: translateX(0); opacity: 0.4; }
+    50% { transform: translateX(-6px); opacity: 1; }
+}
+.arrow-right{ animation: pulse-right 2s ease-in-out infinite; }
+.arrow-left{ animation: pulse-left 2s ease-in-out infinite; }
+
+/* Reveal on scroll */
+.reveal{
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible{
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Soft divider */
+.divider-dot{
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--indigo-600);
+    opacity: 0.4;
+}
+
+/* Mono label */
+.eyebrow{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce){
+    .arrow-right, .arrow-left { animation: none; }
+    .reveal{ transition: none; opacity: 1; transform: none; }
+    .exchange-card{ transition: none; }
+}
+
+/* Focus visibility */
+a:focus-visible, button:focus-visible{
+    outline: 2px solid var(--indigo-600);
+    outline-offset: 3px;
+}
+
+</style>
+</head>
+
+<body class="antialiased">
+
+<!-- ============ NAV ============ -->
+<nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/70 border-b border-indigo-100">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <span class="font-display font-semibold text-xl text-indigo-900">SurvMarkt</span>
+        <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+            <a href="#cara-kerja" class="hover:text-indigo-600 transition">Cara Kerja</a>
+            <a href="#keunggulan" class="hover:text-indigo-600 transition">Keunggulan</a>
+            <a href="#role" class="hover:text-indigo-600 transition">Untuk Siapa</a>
+        </div>
+        <a
+            href="index.html"
+            class="bg-indigo-600 hover:bg-indigo-700 transition text-white text-sm font-semibold px-5 py-2.5 rounded-lg"
+        >
+            Masuk ke SurvMarkt
+        </a>
+    </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero-bg pt-36 pb-24 px-6">
+    <div class="max-w-6xl mx-auto">
+
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <p class="eyebrow text-indigo-600 mb-4">Marketplace Responden Penelitian</p>
+            <h1 class="font-display text-5xl md:text-6xl font-semibold leading-[1.1] text-indigo-900 mb-6">
+                Penelitian butuh responden.
+                <br>
+                <span class="italic">Bukan keberuntungan.</span>
+            </h1>
+            <p class="text-lg text-slate-600 leading-relaxed">
+                SurvMarkt mempertemukan peneliti yang butuh data dengan responden yang
+                ingin diapresiasi atas waktunya. Tanpa sebar Google Form ke grup WhatsApp
+                dan berharap ada yang isi.
+            </p>
+        </div>
+
+        <!-- SIGNATURE: Exchange Visual -->
+        <div class="reveal flex flex-col md:flex-row items-stretch justify-center gap-4 md:gap-0 max-w-3xl mx-auto">
+
+            <!-- Peneliti Card -->
+            <div class="exchange-card flex-1 bg-white rounded-2xl p-7 shadow-lg shadow-indigo-100 border border-indigo-100">
+                <p class="eyebrow text-indigo-600 mb-3">Peneliti</p>
+                <p class="font-display text-2xl text-indigo-900 mb-1">Setor dana</p>
+                <p class="text-sm text-slate-500">Tentukan target & kriteria responden</p>
+            </div>
+
+            <!-- Exchange Arrows -->
+            <div class="flex md:flex-col items-center justify-center gap-2 px-4 py-3 md:py-0">
+                <span class="arrow-right md:hidden text-indigo-400 text-xl">→</span>
+                <span class="hidden md:inline arrow-right text-indigo-400 text-xl rotate-90">→</span>
+                <span class="font-mono text-xs text-slate-400">match</span>
+                <span class="hidden md:inline arrow-left text-amber-500 text-xl rotate-90">→</span>
+                <span class="arrow-left md:hidden text-amber-500 text-xl">←</span>
+            </div>
+
+            <!-- Responden Card -->
+            <div class="exchange-card flex-1 bg-white rounded-2xl p-7 shadow-lg shadow-amber-100 border border-amber-100">
+                <p class="eyebrow text-amber-600 mb-3">Responden</p>
+                <p class="font-display text-2xl text-indigo-900 mb-1">Terima insentif</p>
+                <p class="text-sm text-slate-500">Isi survey yang sesuai profilmu</p>
+            </div>
+
+        </div>
+
+    </div>
+</header>
+
+<!-- ============ APA ITU ============ -->
+<section class="px-6 py-24 bg-white">
+    <div class="max-w-4xl mx-auto text-center">
+        <p class="eyebrow text-indigo-600 mb-4">Apa itu SurvMarkt</p>
+        <h2 class="font-display text-3xl md:text-4xl text-indigo-900 mb-6 leading-snug">
+            Platform yang menukar waktu responden dengan insentif yang jelas,
+            dan menukar usaha peneliti dengan data yang valid.
+        </h2>
+        <p class="text-slate-600 leading-relaxed max-w-2xl mx-auto">
+            Setiap survey punya target responden, insentif per pengisian, dan deadline
+            yang ditentukan sendiri oleh peneliti. Responden hanya melihat survey yang
+            relevan dengan profilnya. Tidak ada spam, tidak ada survey yang salah sasaran.
+        </p>
+    </div>
+</section>
+
+<!-- ============ CARA KERJA (split/mirror) ============ -->
+<section id="cara-kerja" class="px-6 py-24 hero-bg">
+    <div class="max-w-6xl mx-auto">
+
+        <div class="text-center mb-16">
+            <p class="eyebrow text-indigo-600 mb-4">Cara Kerja</p>
+            <h2 class="font-display text-3xl md:text-4xl text-indigo-900">Dua jalur, satu pertemuan</h2>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-px bg-indigo-100 rounded-2xl overflow-hidden reveal">
+
+            <!-- Jalur Peneliti -->
+            <div class="bg-white p-8 md:p-10">
+                <p class="eyebrow text-indigo-600 mb-6">Jalur Peneliti</p>
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <div class="divider-dot mt-2.5 shrink-0"></div>
+                        <div>
+                            <p class="font-semibold text-slate-800">Deposit dana ke wallet</p>
+                            <p class="text-sm text-slate-500 mt-1">Saldo dipakai untuk membayar insentif & biaya platform.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="divider-dot mt-2.5 shrink-0"></div>
+                        <div>
+                            <p class="font-semibold text-slate-800">Buat survey & atur kriteria</p>
+                            <p class="text-sm text-slate-500 mt-1">Tentukan gender, umur, status, insentif, dan deadline.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="divider-dot mt-2.5 shrink-0"></div>
+                        <div>
+                            <p class="font-semibold text-slate-800">Pantau progress real-time</p>
+                            <p class="text-sm text-slate-500 mt-1">Lihat views, conversion rate, dan jumlah responden masuk.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jalur Responden -->
+            <div class="bg-white p-8 md:p-10">
+                <p class="eyebrow text-amber-600 mb-6">Jalur Responden</p>
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <div class="divider-dot mt-2.5 shrink-0 !bg-amber-500"></div>
+                        <div>
+                            <p class="font-semibold text-slate-800">Lihat survey yang relevan</p>
+                            <p class="text-sm text-slate-500 mt-1">Hanya survey yang cocok dengan profilmu yang muncul.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="divider-dot mt-2.5 shrink-0 !bg-amber-500"></div>
+                        <div>
+                            <p class="font-semibold text-slate-800">Isi survey yang dipilih</p>
+                            <p class="text-sm text-slate-500 mt-1">Cek detail lengkap sebelum memutuskan untuk mengisi.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="divider-dot mt-2.5 shrink-0 !bg-amber-500"></div>
+                        <div>
+                            <p class="font-semibold text-slate-800">Insentif masuk ke wallet</p>
+                            <p class="text-sm text-slate-500 mt-1">Tarik saldo kapan saja melalui permintaan withdraw.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ============ KEUNGGULAN ============ -->
+<section id="keunggulan" class="px-6 py-24 bg-white">
+    <div class="max-w-6xl mx-auto">
+
+        <div class="text-center mb-16">
+            <p class="eyebrow text-indigo-600 mb-4">Keunggulan</p>
+            <h2 class="font-display text-3xl md:text-4xl text-indigo-900">Dibangun untuk kebutuhan riset yang nyata</h2>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6 reveal">
+
+            <div class="rounded-2xl p-7 bg-indigo-50 border border-indigo-100">
+                <p class="text-2xl mb-3">🎯</p>
+                <p class="font-semibold text-slate-800 mb-2">Targeting presisi</p>
+                <p class="text-sm text-slate-500 leading-relaxed">
+                    Filter responden berdasarkan gender, rentang umur, dan status —
+                    survey hanya tampil ke orang yang relevan.
+                </p>
+            </div>
+
+            <div class="rounded-2xl p-7 bg-indigo-50 border border-indigo-100">
+                <p class="text-2xl mb-3">⏸️</p>
+                <p class="font-semibold text-slate-800 mb-2">Kendali penuh peneliti</p>
+                <p class="text-sm text-slate-500 leading-relaxed">
+                    Pause, lanjutkan, atau hapus survey kapan saja. Deadline fleksibel
+                    tanpa biaya tambahan — itu hak dasar, bukan fitur premium.
+                </p>
+            </div>
+
+            <div class="rounded-2xl p-7 bg-amber-50 border border-amber-100">
+                <p class="text-2xl mb-3">⭐</p>
+                <p class="font-semibold text-slate-800 mb-2">Featured untuk visibilitas</p>
+                <p class="text-sm text-slate-500 leading-relaxed">
+                    Survey yang butuh responden cepat bisa naik ke posisi teratas
+                    daftar pencarian responden.
+                </p>
+            </div>
+
+            <div class="rounded-2xl p-7 bg-indigo-50 border border-indigo-100">
+                <p class="text-2xl mb-3">📈</p>
+                <p class="font-semibold text-slate-800 mb-2">Analytics bawaan</p>
+                <p class="text-sm text-slate-500 leading-relaxed">
+                    Views, jumlah responden, dan conversion rate tersedia
+                    di setiap survey tanpa alat tambahan.
+                </p>
+            </div>
+
+            <div class="rounded-2xl p-7 bg-indigo-50 border border-indigo-100">
+                <p class="text-2xl mb-3">💸</p>
+                <p class="font-semibold text-slate-800 mb-2">Insentif transparan</p>
+                <p class="text-sm text-slate-500 leading-relaxed">
+                    Responden tahu persis berapa yang akan diterima sebelum
+                    memutuskan mengisi survey.
+                </p>
+            </div>
+
+            <div class="rounded-2xl p-7 bg-indigo-50 border border-indigo-100">
+                <p class="text-2xl mb-3">🔔</p>
+                <p class="font-semibold text-slate-800 mb-2">Notifikasi real-time</p>
+                <p class="text-sm text-slate-500 leading-relaxed">
+                    Setiap aktivitas penting — dari deposit sampai survey berakhir —
+                    langsung tercatat.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ============ ROLE ============ -->
+<section id="role" class="px-6 py-24 hero-bg">
+    <div class="max-w-6xl mx-auto">
+
+        <div class="text-center mb-16">
+            <p class="eyebrow text-indigo-600 mb-4">Untuk Siapa</p>
+            <h2 class="font-display text-3xl md:text-4xl text-indigo-900">Tiga peran, satu platform</h2>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+
+            <div class="bg-white rounded-2xl p-8 shadow-md shadow-indigo-100/50">
+                <p class="eyebrow text-indigo-600 mb-3">Peneliti</p>
+                <p class="font-display text-xl text-indigo-900 mb-3">Mahasiswa & Dosen</p>
+                <p class="text-sm text-slate-500 leading-relaxed">
+                    Sedang mengerjakan skripsi, tesis, atau proyek riset dan butuh
+                    responden dengan kriteria spesifik dalam waktu terbatas.
+                </p>
+            </div>
+
+            <div class="bg-white rounded-2xl p-8 shadow-md shadow-amber-100/50">
+                <p class="eyebrow text-amber-600 mb-3">Responden</p>
+                <p class="font-display text-xl text-indigo-900 mb-3">Mahasiswa & Pekerja</p>
+                <p class="text-sm text-slate-500 leading-relaxed">
+                    Ingin mengisi waktu luang sambil mendapat insentif dari
+                    survey yang relevan dengan latar belakangnya.
+                </p>
+            </div>
+
+            <div class="bg-white rounded-2xl p-8 shadow-md shadow-indigo-100/50">
+                <p class="eyebrow text-indigo-600 mb-3">Admin</p>
+                <p class="font-display text-xl text-indigo-900 mb-3">Pengelola Platform</p>
+                <p class="text-sm text-slate-500 leading-relaxed">
+                    Memantau performa platform, transaksi, dan memastikan
+                    proses berjalan adil bagi kedua belah pihak.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="px-6 py-28 bg-indigo-900">
+    <div class="max-w-2xl mx-auto text-center">
+        <h2 class="font-display text-3xl md:text-4xl text-white mb-5 leading-snug">
+            Mulai cari respondenmu hari ini
+        </h2>
+        <p class="text-indigo-200 mb-10">
+            Tidak perlu kartu kredit. Tidak perlu instalasi. Buka di browser, pilih peran, mulai.
+        </p>
+        <a
+            href="index.html"
+            class="inline-block bg-amber-500 hover:bg-amber-400 transition text-indigo-900 font-semibold px-8 py-4 rounded-lg"
+        >
+            Masuk ke SurvMarkt →
+        </a>
+    </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="px-6 py-10 bg-white border-t border-indigo-100">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <span class="font-display font-semibold text-indigo-900">SurvMarkt</span>
+        <p class="text-sm text-slate-400">Marketplace Responden Penelitian — Tugas Besar Wirausaha Basis Teknologi</p>
+    </div>
+</footer>
+
+<script>
+
+// Reveal on scroll
+const revealEls = document.querySelectorAll('.reveal');
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if(entry.isIntersecting){
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.15 });
+
+revealEls.forEach(el => observer.observe(el));
+
+// Smooth scroll for in-page anchors
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+        const target = document.querySelector(link.getAttribute('href'));
+        if(target){
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+});
+
+</script>
+
+</body>
+</html>

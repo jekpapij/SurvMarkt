@@ -24,6 +24,9 @@ let withdrawals =
         localStorage.getItem("withdrawals")
     ) || [];
 
+/* ====================================
+   HELPER: apply dark/light to wrappers
+==================================== */
 
 function applyWrapperTheme(){
 
@@ -58,7 +61,9 @@ function applyWrapperTheme(){
 
 }
 
-
+/* ====================================
+   WINDOW ONLOAD
+==================================== */
 
 window.onload = function(){
 
@@ -70,6 +75,8 @@ window.onload = function(){
     updateThemeButton();
     applyWrapperTheme();
 
+    // Cek deadline survey yang sudah lewat -> auto CLOSED.
+    // Harus dijalankan SEBELUM render apapun yang menampilkan status survey.
     checkExpiredSurveys();
 
     let role = localStorage.getItem("role");
@@ -145,11 +152,15 @@ window.onload = function(){
     updateStats();
     renderSurveyProgress();
 
+    // FIX: renderNotifications dipanggil SEKALI di sini saja,
+    // tidak lagi dipanggil di dalam tiap blok role agar tidak spam
     renderNotifications();
 
 };
 
-
+/* ====================================
+   TOAST
+==================================== */
 
 function showToast(msg, type = "info"){
 
@@ -175,7 +186,26 @@ function showToast(msg, type = "info"){
 
 }
 
+/* ====================================
+   EMPTY STATE HELPER
+   Reusable agar konsisten di seluruh app:
+   ikon besar + judul + sub-text yang membantu.
+==================================== */
 
+function emptyState(icon, title, subtitle){
+
+    return `
+    <div class="flex flex-col items-center justify-center text-center py-10 px-4">
+        <span class="text-5xl mb-3">${icon}</span>
+        <p class="font-semibold text-slate-600">${title}</p>
+        <p class="text-sm text-slate-400 mt-1">${subtitle}</p>
+    </div>`;
+
+}
+
+/* ====================================
+   WALLET
+==================================== */
 
 function updateWallet(){
 
@@ -187,7 +217,9 @@ function updateWallet(){
 
 }
 
-
+/* ====================================
+   PENELITI
+==================================== */
 
 function deposit(){
 
@@ -210,12 +242,14 @@ function deposit(){
     updateWallet();
     showToast("Deposit berhasil","success");
 
-    addNotification(" Deposit berhasil");
+    addNotification("💰 Deposit berhasil");
     renderNotifications();
 
 }
 
-
+/* ====================================
+   RESPONDEN
+==================================== */
 
 function withdraw(){
 
@@ -240,12 +274,14 @@ function withdraw(){
 
     showToast("Request withdraw berhasil dibuat","success");
 
-    addNotification(" Withdrawal request dibuat");
+    addNotification("📤 Withdrawal request dibuat");
     renderNotifications();
 
 }
 
-
+/* ====================================
+   LOGOUT
+==================================== */
 
 function logout(){
     localStorage.removeItem("role");
@@ -255,7 +291,9 @@ function logout(){
     window.location.href = "index.html";
 }
 
-
+/* ====================================
+   KALKULATOR INSENTIF
+==================================== */
 
 if(document.getElementById("insentif")){
     insentif.addEventListener("input", calc);
@@ -313,7 +351,9 @@ function calc(){
 
 }
 
-
+/* ====================================
+   CREATE SURVEY
+==================================== */
 
 function createSurvey(){
 
@@ -336,6 +376,7 @@ function createSurvey(){
         return;
     }
 
+    // DEADLINE SURVEY: ambil dari preset (X hari dari sekarang) atau custom date
     let deadlineValue = getDeadlineFromForm();
     if(deadlineValue === null){
         showToast("Deadline survey tidak valid (harus tanggal di masa depan)","error");
@@ -394,11 +435,17 @@ function createSurvey(){
 
     showToast("Survey berhasil dibuat","success");
 
-    addNotification(` Survey "${title}" berhasil dibuat`);
+    addNotification(`📋 Survey "${title}" berhasil dibuat`);
     renderNotifications();
 
 }
 
+/* ====================================
+   DEADLINE SURVEY
+   - Preset: X hari dari sekarang
+   - Custom: tanggal bebas dipilih peneliti
+   - Pure operasional, TIDAK ADA biaya tambahan
+==================================== */
 
 function toggleCustomDeadline(){
 
@@ -423,12 +470,13 @@ function getDeadlineFromForm(){
 
         if(!custom) return null;
 
+        // Pastikan custom date di masa depan (minimal besok)
         let chosenDate = new Date(custom + "T23:59:59");
         let now        = new Date();
 
         if(chosenDate <= now) return null;
 
-        return custom; 
+        return custom; // format YYYY-MM-DD dari <input type="date">
 
     } else {
 
@@ -442,7 +490,13 @@ function getDeadlineFromForm(){
 
 }
 
-
+/* ====================================
+   CEK SURVEY EXPIRED
+   Dijalankan sekali saat window.onload.
+   Karena data persisten di localStorage, status yang
+   sudah di-update tetap akurat meski user baru buka
+   dashboard beberapa hari kemudian.
+==================================== */
 
 function checkExpiredSurveys(){
 
@@ -453,6 +507,7 @@ function checkExpiredSurveys(){
 
     surveys.forEach(s => {
 
+        // Hanya cek survey yang masih OPEN/PAUSED dan punya deadline
         if(
             (s.surveyStatus === "OPEN" || s.surveyStatus === "PAUSED") &&
             s.deadline
@@ -463,7 +518,7 @@ function checkExpiredSurveys(){
                 s.surveyStatus = "CLOSED";
                 changed = true;
 
-                addNotification(` Survey "${s.title}" berakhir`);
+                addNotification(`⏰ Survey "${s.title}" berakhir`);
             }
         }
 
@@ -476,7 +531,9 @@ function checkExpiredSurveys(){
 
 }
 
-
+/* ====================================
+   DEADLINE: HELPER FUNCTIONS
+==================================== */
 
 function getDaysUntilDeadline(deadline){
 
@@ -508,7 +565,9 @@ function formatDeadline(deadline){
 
 }
 
-
+/* ====================================
+   FILTER RESPONDEN
+==================================== */
 
 function resetFilter(){
     minPrice.value = "";
@@ -546,10 +605,15 @@ function renderSurvey(){
         ){
             result++;
 
+            // FIX: pakai index asli dari array surveys (bukan index hasil sort)
+            // agar openSurveyModal/takeSurvey selalu merujuk survey yang benar
             let realIndex = surveys.indexOf(s);
 
             let progress = Math.round((s.current / s.count) * 100);
 
+            // FEATURED VISUAL UPGRADE:
+            // - selalu di atas (sudah ditangani lewat sortedSurvey)
+            // - border kuning + shadow lebih terang + gradient tipis
             let cardClass = s.featured
                 ? "relative bg-gradient-to-br from-yellow-50 to-white rounded-2xl shadow-lg shadow-yellow-200/60 p-5 hover:shadow-xl transition border-2 border-yellow-400"
                 : "relative bg-white rounded-2xl shadow p-5 hover:shadow-xl transition border border-transparent";
@@ -615,7 +679,7 @@ function renderHistory(){
         JSON.parse(localStorage.getItem("surveyHistory")) || [];
 
     if(history.length === 0){
-        historyList.innerHTML = `<p class="text-gray-500">Belum ada survey yang dikerjakan</p>`;
+        historyList.innerHTML = emptyState("📭", "Belum ada survey yang dikerjakan", "Survey yang sudah kamu isi akan muncul di sini");
         return;
     }
 
@@ -623,14 +687,16 @@ function renderHistory(){
         historyList.innerHTML += `
         <div class="border-b py-3">
             <p class="font-semibold">${h.title}</p>
-            <p class="text-sm"> Rp ${Number(h.insentif).toLocaleString("id-ID")}</p>
+            <p class="text-sm">💰 Rp ${Number(h.insentif).toLocaleString("id-ID")}</p>
             <p class="text-xs text-gray-500">${h.date}</p>
         </div>`;
     });
 
 }
 
-
+/* ====================================
+   SURVEY DETAIL MODAL
+==================================== */
 
 let currentModalIndex = null;
 
@@ -641,6 +707,7 @@ function openSurveyModal(i){
 
     currentModalIndex = i;
 
+    // ANALYTICS: views bertambah saat responden membuka detail survey
     s.views = Number(s.views || 0) + 1;
     localStorage.setItem("surveys", JSON.stringify(surveys));
 
@@ -717,7 +784,10 @@ function takeSurveyFromModal(){
 
 }
 
-
+/* ====================================
+   RESEARCHER: MANAGE SURVEY MODAL
+   (Pause / Resume / Delete)
+==================================== */
 
 let currentResearcherModalIndex = null;
 
@@ -751,6 +821,7 @@ function openResearcherSurveyModal(i){
             ${s.surveyStatus}
         </span>`;
 
+    // DEADLINE: tampilkan tanggal + sisa hari (kalau masih relevan)
     if(s.deadline){
         let daysLeft = getDaysUntilDeadline(s.deadline);
         let extraInfo = "";
@@ -775,6 +846,7 @@ function openResearcherSurveyModal(i){
     rModalProgressLabel.innerText = `${s.current}/${s.count} (${progress}%)`;
     rModalProgressBar.style.width = progress + "%";
 
+    // ANALYTICS: views, respondent (current), conversion = current/views * 100
     let viewsCount = Number(s.views || 0);
     let conversion = viewsCount > 0
         ? Math.round((s.current / viewsCount) * 100)
@@ -784,7 +856,11 @@ function openResearcherSurveyModal(i){
     rModalRespondent.innerText = s.current;
     rModalConversion.innerText = conversion + "%";
 
-   
+    // Tombol aksi disusun sesuai restriksi:
+    // OPEN   -> bisa Pause
+    // PAUSED -> bisa Resume
+    // CLOSED -> tidak bisa pause/resume (final state)
+    // Delete selalu tersedia selama belum DELETED
     let actionsHTML = "";
 
     if(s.surveyStatus === "OPEN"){
@@ -793,7 +869,7 @@ function openResearcherSurveyModal(i){
                 onclick="pauseSurvey(${i})"
                 class="w-full bg-yellow-500 hover:bg-yellow-600 transition text-white py-3 rounded-lg font-semibold"
             >
-                 Pause Survey
+                ⏸ Pause Survey
             </button>`;
     }
     else if(s.surveyStatus === "PAUSED"){
@@ -802,7 +878,7 @@ function openResearcherSurveyModal(i){
                 onclick="resumeSurvey(${i})"
                 class="w-full bg-green-500 hover:bg-green-600 transition text-white py-3 rounded-lg font-semibold"
             >
-                 Resume Survey
+                ▶️ Resume Survey
             </button>`;
     }
     else if(s.surveyStatus === "CLOSED"){
@@ -817,7 +893,7 @@ function openResearcherSurveyModal(i){
             onclick="deleteSurvey(${i})"
             class="w-full bg-red-500 hover:bg-red-600 transition text-white py-3 rounded-lg font-semibold"
         >
-             Hapus Survey
+            🗑 Hapus Survey
         </button>`;
 
     rModalActions.innerHTML = actionsHTML;
@@ -848,7 +924,7 @@ function pauseSurvey(i){
     updateStats();
 
     showToast(`Survey "${s.title}" dipause`, "info");
-    addNotification(` Survey "${s.title}" dipause`);
+    addNotification(`⏸ Survey "${s.title}" dipause`);
     renderNotifications();
 
 }
@@ -866,7 +942,7 @@ function resumeSurvey(i){
     updateStats();
 
     showToast(`Survey "${s.title}" dilanjutkan`, "success");
-    addNotification(` Survey "${s.title}" dilanjutkan`);
+    addNotification(`▶️ Survey "${s.title}" dilanjutkan`);
     renderNotifications();
 
 }
@@ -889,12 +965,14 @@ function deleteSurvey(i){
     updateStats();
 
     showToast(`Survey "${s.title}" dihapus`, "error");
-    addNotification(` Survey "${s.title}" dihapus`);
+    addNotification(`🗑 Survey "${s.title}" dihapus`);
     renderNotifications();
 
 }
 
-
+/* ====================================
+   TAKE SURVEY
+==================================== */
 
 function takeSurvey(i){
 
@@ -908,7 +986,7 @@ function takeSurvey(i){
         surveys[i].surveyStatus !== "CLOSED"
     ){
         surveys[i].surveyStatus = "CLOSED";
-        addNotification(` Survey "${surveys[i].title}" selesai`);
+        addNotification(`🎉 Survey "${surveys[i].title}" selesai`);
         renderNotifications();
     }
 
@@ -947,7 +1025,9 @@ function takeSurvey(i){
 
 }
 
-
+/* ====================================
+   STATS
+==================================== */
 
 function updateStats(){
 
@@ -955,14 +1035,16 @@ function updateStats(){
 
     if(role === "researcher"){
 
-       
+        // Total Spent tetap dihitung dari SEMUA survey (termasuk yang sudah dihapus)
+        // karena uangnya sudah terlanjur dipotong dari wallet saat createSurvey.
         let totalSpent = surveys.reduce((acc,s) => {
             let subtotal = s.count * s.insentif;
             let fee      = subtotal * 0.20;
             return acc + subtotal + fee;
         }, 0);
 
-        
+        // Survey yang DELETED tidak dihitung di Total Survey & Target Responden
+        // karena dari sudut pandang peneliti, survey itu sudah "tidak ada".
         let visibleSurveys = surveys.filter(s => s.surveyStatus !== "DELETED");
 
         let totalSurvey      = visibleSurveys.length;
@@ -1025,7 +1107,9 @@ function updateStats(){
 
 }
 
-
+/* ====================================
+   DARK MODE
+==================================== */
 
 function toggleTheme(){
 
@@ -1075,7 +1159,160 @@ function clearSurvey(){
     location.reload();
 }
 
+/* ====================================
+   DEMO DATA SEEDER
+   Hanya untuk keperluan presentasi/demo.
+   Mengisi survey, withdrawal, dan notifikasi
+   dengan jumlah yang realistis (tidak berlebihan)
+   agar tetap mudah dibaca saat ditampilkan ke audiens.
+==================================== */
 
+function generateDemoData(){
+
+    let confirmGenerate = confirm(
+        "Generate demo data?\n\nIni akan MENAMBAHKAN data contoh (survey, withdrawal, notifikasi) ke data yang sudah ada. Cocok untuk keperluan presentasi."
+    );
+    if(!confirmGenerate) return;
+
+    let today = new Date();
+
+    function daysFromNow(days){
+        let d = new Date();
+        d.setDate(d.getDate() + days);
+        return d.toISOString().split("T")[0];
+    }
+
+    let demoSurveys = [
+        {
+            title: "Kepuasan Mahasiswa Terhadap Layanan Akademik",
+            description: "Survey untuk mengukur tingkat kepuasan mahasiswa terhadap layanan akademik kampus, mencakup pelayanan dosen, staf, dan fasilitas pendukung perkuliahan.",
+            duration: 10, count: 100, current: 67, views: 312,
+            surveyStatus: "OPEN", link: "https://forms.gle/demo1",
+            insentif: 3000, featured: true,
+            gender: "All", age: "All", status: "Mahasiswa",
+            deadline: daysFromNow(14)
+        },
+        {
+            title: "Pola Konsumsi Kopi di Kalangan Pekerja Muda",
+            description: "Penelitian mengenai kebiasaan konsumsi kopi harian, preferensi jenis kopi, dan pengaruhnya terhadap produktivitas kerja pada pekerja usia 23-30 tahun.",
+            duration: 5, count: 50, current: 50, views: 180,
+            surveyStatus: "CLOSED", link: "https://forms.gle/demo2",
+            insentif: 2000, featured: false,
+            gender: "All", age: "23-30", status: "Pekerja",
+            deadline: daysFromNow(-5)
+        },
+        {
+            title: "Persepsi Mahasiswa terhadap Pembelajaran Daring",
+            description: "Mengukur efektivitas pembelajaran daring dibandingkan tatap muka dari sudut pandang mahasiswa aktif S1.",
+            duration: 8, count: 80, current: 23, views: 95,
+            surveyStatus: "PAUSED", link: "https://forms.gle/demo3",
+            insentif: 2500, featured: false,
+            gender: "All", age: "18-22", status: "Mahasiswa",
+            deadline: daysFromNow(20)
+        },
+        {
+            title: "Minat Investasi Generasi Muda",
+            description: "Survey untuk skripsi mengenai tingkat literasi dan minat investasi pada generasi muda usia produktif.",
+            duration: 12, count: 150, current: 134, views: 410,
+            surveyStatus: "OPEN", link: "https://forms.gle/demo4",
+            insentif: 4000, featured: true,
+            gender: "All", age: "All", status: "All",
+            deadline: daysFromNow(2)
+        },
+        {
+            title: "Evaluasi Kantin Kampus",
+            description: "Penelitian deskriptif mengenai kualitas, harga, dan kebersihan kantin di lingkungan kampus.",
+            duration: 6, count: 60, current: 12, views: 48,
+            surveyStatus: "OPEN", link: "https://forms.gle/demo5",
+            insentif: 1500, featured: false,
+            gender: "All", age: "All", status: "Mahasiswa",
+            deadline: daysFromNow(10)
+        },
+        {
+            title: "Preferensi Moda Transportasi Pekerja Kantoran",
+            description: "Survey mengenai pilihan moda transportasi harian pekerja kantoran dan faktor yang memengaruhinya.",
+            duration: 7, count: 70, current: 70, views: 220,
+            surveyStatus: "CLOSED", link: "https://forms.gle/demo6",
+            insentif: 2000, featured: false,
+            gender: "All", age: "All", status: "Pekerja",
+            deadline: daysFromNow(-1)
+        },
+        {
+            title: "Survey Internal yang Sudah Tidak Relevan",
+            description: "Contoh survey yang sudah dihapus peneliti untuk mendemonstrasikan fitur soft-delete pada admin panel.",
+            duration: 5, count: 30, current: 8, views: 22,
+            surveyStatus: "DELETED", link: "https://forms.gle/demo7",
+            insentif: 1500, featured: false,
+            gender: "All", age: "All", status: "All",
+            deadline: daysFromNow(-10)
+        }
+    ];
+
+    surveys.push(...demoSurveys);
+    localStorage.setItem("surveys", JSON.stringify(surveys));
+
+    let demoWithdrawals = [
+        { id: Date.now() - 5000, amount: 25000, status: "Pending"  },
+        { id: Date.now() - 4000, amount: 40000, status: "Approved" },
+        { id: Date.now() - 3000, amount: 15000, status: "Pending"  },
+        { id: Date.now() - 2000, amount: 60000, status: "Rejected" },
+        { id: Date.now() - 1000, amount: 30000, status: "Approved" }
+    ];
+
+    withdrawals.push(...demoWithdrawals);
+    localStorage.setItem("withdrawals", JSON.stringify(withdrawals));
+
+    // Revenue demo: dijumlahkan dari fee 20% tiap survey demo
+    let demoRevenue = demoSurveys.reduce((acc, s) => acc + (s.count * s.insentif * 0.20), 0);
+    let currentRevenue = Number(localStorage.getItem("revenue")) || 0;
+    localStorage.setItem("revenue", currentRevenue + demoRevenue);
+
+    // Notifikasi mengikuti aktivitas demo agar tetap kontekstual,
+    // bukan 100 notifikasi acak tanpa makna.
+    addNotification(`📋 Survey "${demoSurveys[0].title}" berhasil dibuat`);
+    addNotification(`⭐ Survey "${demoSurveys[3].title}" dijadikan featured`);
+    addNotification(`✅ Survey "${demoSurveys[1].title}" berhasil diisi`);
+    addNotification(`🎉 Survey "${demoSurveys[1].title}" selesai`);
+    addNotification(`⏸ Survey "${demoSurveys[2].title}" dipause`);
+    addNotification(`⏰ Survey "${demoSurveys[5].title}" berakhir`);
+    addNotification(`🗑 Survey "${demoSurveys[6].title}" dihapus`);
+    addNotification(`📤 Withdrawal request dibuat`);
+    addNotification(`✅ Withdrawal Rp 40.000 disetujui`);
+    addNotification(`❌ Withdrawal Rp 60.000 ditolak`);
+
+    showToast("Demo data berhasil dibuat", "success");
+
+    renderAdminStats();
+    renderWithdrawals();
+    renderDeletedSurveys();
+    renderNotifications();
+
+}
+
+function resetDemoData(){
+
+    let confirmReset = confirm(
+        "Reset SEMUA data?\n\nIni akan menghapus seluruh survey, withdrawal, notifikasi, dan riwayat. Tindakan ini tidak bisa dibatalkan."
+    );
+    if(!confirmReset) return;
+
+    localStorage.removeItem("surveys");
+    localStorage.removeItem("withdrawals");
+    localStorage.removeItem("notifications");
+    localStorage.removeItem("surveyHistory");
+    localStorage.removeItem("revenue");
+    localStorage.removeItem("taken");
+    localStorage.removeItem("earned");
+
+    showToast("Semua data direset", "info");
+
+    location.reload();
+
+}
+
+/* ====================================
+   SURVEY PROGRESS
+==================================== */
 
 function renderSurveyProgress(){
 
@@ -1084,10 +1321,11 @@ function renderSurveyProgress(){
 
     container.innerHTML = "";
 
+    // Survey yang DELETED tidak ditampilkan di dashboard peneliti
     let visibleSurveys = surveys.filter(s => s.surveyStatus !== "DELETED");
 
     if(visibleSurveys.length === 0){
-        container.innerHTML = `<p class="text-gray-500">Belum ada survey</p>`;
+        container.innerHTML = emptyState("📋", "Belum ada survey", "Mulai buat survey pertamamu di form sebelah kiri");
         return;
     }
 
@@ -1101,11 +1339,13 @@ function renderSurveyProgress(){
             s.surveyStatus === "PAUSED" ? "bg-yellow-500 text-white" :
                                            "bg-red-500 text-white";
 
+        // ANALYTICS: views & conversion rate (current / views * 100)
         let viewsCount  = Number(s.views || 0);
         let conversion  = viewsCount > 0
             ? Math.round((s.current / viewsCount) * 100)
             : 0;
 
+        // DEADLINE: tampilkan sisa hari & badge "Expiring Soon" (<=3 hari, status masih OPEN)
         let daysLeft = getDaysUntilDeadline(s.deadline);
         let expiringSoonBadge = "";
         let deadlineInfo       = "";
@@ -1114,7 +1354,7 @@ function renderSurveyProgress(){
             if(s.surveyStatus === "OPEN" && daysLeft !== null && daysLeft <= 3 && daysLeft >= 0){
                 expiringSoonBadge = `<span class="px-2 py-1 rounded-full text-xs font-bold bg-orange-500 text-white ml-1">⚠ Expiring Soon</span>`;
             }
-            deadlineInfo = `<p class="text-xs text-slate-400 mt-1"> Deadline: ${formatDeadline(s.deadline)}</p>`;
+            deadlineInfo = `<p class="text-xs text-slate-400 mt-1">📅 Deadline: ${formatDeadline(s.deadline)}</p>`;
         }
 
         container.innerHTML += `
@@ -1147,7 +1387,9 @@ function renderSurveyProgress(){
 
 }
 
-
+/* ====================================
+   ADMIN STATS
+==================================== */
 
 function renderAdminStats(){
 
@@ -1177,6 +1419,7 @@ function renderAdminStats(){
 
     let revenue = Number(localStorage.getItem("revenue")) || 0;
 
+    // Survey DELETED tidak dihitung di statistik normal — ditampilkan terpisah
     let activeSurveysList = surveys.filter(s => s.surveyStatus !== "DELETED");
 
     let activeSurvey = activeSurveysList.filter(s => s.surveyStatus === "OPEN").length;
@@ -1215,7 +1458,7 @@ function renderAdminStats(){
             <p>Survey Selesai : ${closedSurvey}</p>
         </div>
         <div class="${subCardClass}">
-            <h3 class="font-semibold mb-3"> Statistik Keuangan</h3>
+            <h3 class="font-semibold mb-3">💰 Statistik Keuangan</h3>
             <p>Revenue : Rp ${revenue.toLocaleString("id-ID")}</p>
             <p>Total Insentif : Rp ${totalInsentif.toLocaleString("id-ID")}</p>
         </div>`;
@@ -1225,7 +1468,11 @@ function renderAdminStats(){
 
 }
 
-
+/* ====================================
+   ADMIN: REVENUE CHART (dummy 4 minggu)
+   Minggu 1-3 = dummy kecil, Minggu 4 = revenue asli
+   agar trend kelihatan naik (growth story untuk demo)
+==================================== */
 
 function renderRevenueChart(currentRevenue){
 
@@ -1241,7 +1488,9 @@ function renderRevenueChart(currentRevenue){
             : "rounded-3xl p-6 shadow-lg bg-white text-slate-900";
     }
 
-    
+    // Dummy proporsional dari revenue saat ini, minggu terakhir = revenue asli.
+    // Kalau revenue masih 0 (belum ada survey), tetap kasih dummy kecil
+    // biar chart-nya tidak kosong total.
     let base = currentRevenue > 0 ? currentRevenue : 40000;
 
     let weeks = [
@@ -1270,7 +1519,10 @@ function renderRevenueChart(currentRevenue){
 
 }
 
-
+/* ====================================
+   ADMIN: TOP SURVEY WIDGET
+   Ranking top 3 berdasarkan views
+==================================== */
 
 function renderTopSurvey(){
 
@@ -1286,6 +1538,7 @@ function renderTopSurvey(){
             : "rounded-3xl p-6 shadow-lg bg-white text-slate-900";
     }
 
+    // Survey DELETED tidak ikut diranking
     let ranked = surveys
         .filter(s => s.surveyStatus !== "DELETED")
         .slice()
@@ -1293,7 +1546,7 @@ function renderTopSurvey(){
         .slice(0, 3);
 
     if(ranked.length === 0){
-        list.innerHTML = `<p class="text-gray-500">Belum ada data survey</p>`;
+        list.innerHTML = emptyState("🏆", "Belum ada data survey", "Top survey akan muncul setelah ada views dari responden");
         return;
     }
 
@@ -1315,7 +1568,9 @@ function renderTopSurvey(){
 
 }
 
-
+/* ====================================
+   ADMIN: SURVEY TERHAPUS (SOFT DELETE)
+==================================== */
 
 function renderDeletedSurveys(){
 
@@ -1336,7 +1591,7 @@ function renderDeletedSurveys(){
     let deletedSurveys = surveys.filter(s => s.surveyStatus === "DELETED");
 
     if(deletedSurveys.length === 0){
-        list.innerHTML = `<p class="text-gray-500">Belum ada survey yang dihapus</p>`;
+        list.innerHTML = emptyState("🗑", "Belum ada survey yang dihapus", "Riwayat survey yang dihapus peneliti akan tercatat di sini");
         return;
     }
 
@@ -1360,7 +1615,9 @@ function renderDeletedSurveys(){
 
 }
 
-
+/* ====================================
+   TOGGLE SIDEBAR
+==================================== */
 
 function toggleSidebar(){
 
@@ -1377,7 +1634,9 @@ function toggleSidebar(){
 
 }
 
-
+/* ====================================
+   WITHDRAWALS
+==================================== */
 
 function renderWithdrawals(){
 
@@ -1388,6 +1647,11 @@ function renderWithdrawals(){
 
     withdrawals =
         JSON.parse(localStorage.getItem("withdrawals")) || [];
+
+    if(withdrawals.length === 0){
+        list.innerHTML = emptyState("💸", "Belum ada permintaan withdraw", "Permintaan penarikan saldo dari responden akan muncul di sini");
+        return;
+    }
 
     withdrawals.forEach((w, index) => {
 
@@ -1459,7 +1723,9 @@ function rejectWithdraw(index){
 
 }
 
-
+/* ====================================
+   NOTIFICATIONS
+==================================== */
 
 function addNotification(message){
 
@@ -1474,6 +1740,7 @@ function addNotification(message){
 
 function renderNotifications(){
 
+    // FIX: pakai querySelector agar tidak bergantung pada posisi elemen di DOM
     let list = document.getElementById("notificationList");
     if(!list) return;
 
@@ -1487,7 +1754,7 @@ function renderNotifications(){
     }
 
     if(data.length === 0){
-        list.innerHTML = `<p class="text-gray-500">Belum ada notifikasi</p>`;
+        list.innerHTML = emptyState("🔔", "Belum ada notifikasi", "Aktivitas seperti deposit, withdraw, dan survey akan muncul di sini");
         return;
     }
 
