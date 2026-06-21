@@ -75,6 +75,10 @@ window.onload = function(){
     updateThemeButton();
     applyWrapperTheme();
 
+    // Cek deadline survey yang sudah lewat -> auto CLOSED.
+    // Harus dijalankan SEBELUM render apapun yang menampilkan status survey.
+    checkExpiredSurveys();
+
     let role = localStorage.getItem("role");
 
     roleText.innerText =
@@ -221,7 +225,7 @@ function deposit(){
     updateWallet();
     showToast("Deposit berhasil","success");
 
-    addNotification("💰 Deposit berhasil");
+    addNotification(" Deposit berhasil");
     renderNotifications();
 
 }
@@ -253,7 +257,7 @@ function withdraw(){
 
     showToast("Request withdraw berhasil dibuat","success");
 
-    addNotification("📤 Withdrawal request dibuat");
+    addNotification(" Withdrawal request dibuat");
     renderNotifications();
 
 }
@@ -355,6 +359,13 @@ function createSurvey(){
         return;
     }
 
+    // DEADLINE SURVEY: ambil dari preset (X hari dari sekarang) atau custom date
+    let deadlineValue = getDeadlineFromForm();
+    if(deadlineValue === null){
+        showToast("Deadline survey tidak valid (harus tanggal di masa depan)","error");
+        return;
+    }
+
     let subtotal     = c * ins;
     let fee          = subtotal * 0.20;
     let revenue      = Number(localStorage.getItem("revenue")) || 0;
@@ -394,7 +405,8 @@ function createSurvey(){
         featured     : document.getElementById("featuredSurvey").checked,
         gender       : fGender.value,
         age          : fAge.value,
-        status       : fStatus.value
+        status       : fStatus.value,
+        deadline     : deadlineValue
     };
 
     surveys.push(survey);
@@ -406,8 +418,133 @@ function createSurvey(){
 
     showToast("Survey berhasil dibuat","success");
 
-    addNotification(`📋 Survey "${title}" berhasil dibuat`);
+    addNotification(` Survey "${title}" berhasil dibuat`);
     renderNotifications();
+
+}
+
+/* ====================================
+   DEADLINE SURVEY
+   - Preset: X hari dari sekarang
+   - Custom: tanggal bebas dipilih peneliti
+   - Pure operasional, TIDAK ADA biaya tambahan
+==================================== */
+
+function toggleCustomDeadline(){
+
+    let preset = document.getElementById("deadlinePreset");
+    let custom = document.getElementById("deadlineCustom");
+    if(!preset || !custom) return;
+
+    if(preset.value === "custom"){
+        custom.classList.remove("hidden");
+    } else {
+        custom.classList.add("hidden");
+    }
+
+}
+
+function getDeadlineFromForm(){
+
+    let preset = document.getElementById("deadlinePreset")?.value;
+    let custom = document.getElementById("deadlineCustom")?.value;
+
+    if(preset === "custom"){
+
+        if(!custom) return null;
+
+        // Pastikan custom date di masa depan (minimal besok)
+        let chosenDate = new Date(custom + "T23:59:59");
+        let now        = new Date();
+
+        if(chosenDate <= now) return null;
+
+        return custom; // format YYYY-MM-DD dari <input type="date">
+
+    } else {
+
+        let days = Number(preset) || 14;
+        let deadlineDate = new Date();
+        deadlineDate.setDate(deadlineDate.getDate() + days);
+
+        return deadlineDate.toISOString().split("T")[0]; // YYYY-MM-DD
+
+    }
+
+}
+
+/* ====================================
+   CEK SURVEY EXPIRED
+   Dijalankan sekali saat window.onload.
+   Karena data persisten di localStorage, status yang
+   sudah di-update tetap akurat meski user baru buka
+   dashboard beberapa hari kemudian.
+==================================== */
+
+function checkExpiredSurveys(){
+
+    let today = new Date();
+    today.setHours(0,0,0,0);
+
+    let changed = false;
+
+    surveys.forEach(s => {
+
+        // Hanya cek survey yang masih OPEN/PAUSED dan punya deadline
+        if(
+            (s.surveyStatus === "OPEN" || s.surveyStatus === "PAUSED") &&
+            s.deadline
+        ){
+            let deadlineDate = new Date(s.deadline + "T00:00:00");
+
+            if(today > deadlineDate){
+                s.surveyStatus = "CLOSED";
+                changed = true;
+
+                addNotification(` Survey "${s.title}" berakhir`);
+            }
+        }
+
+    });
+
+    if(changed){
+        localStorage.setItem("surveys", JSON.stringify(surveys));
+        renderNotifications();
+    }
+
+}
+
+/* ====================================
+   DEADLINE: HELPER FUNCTIONS
+==================================== */
+
+function getDaysUntilDeadline(deadline){
+
+    if(!deadline) return null;
+
+    let today = new Date();
+    today.setHours(0,0,0,0);
+
+    let deadlineDate = new Date(deadline + "T00:00:00");
+
+    let diffMs   = deadlineDate - today;
+    let diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+    return diffDays;
+
+}
+
+function formatDeadline(deadline){
+
+    if(!deadline) return "-";
+
+    let d = new Date(deadline + "T00:00:00");
+
+    return d.toLocaleDateString("id-ID", {
+        day:   "numeric",
+        month: "long",
+        year:  "numeric"
+    });
 
 }
 
@@ -533,7 +670,7 @@ function renderHistory(){
         historyList.innerHTML += `
         <div class="border-b py-3">
             <p class="font-semibold">${h.title}</p>
-            <p class="text-sm">💰 Rp ${Number(h.insentif).toLocaleString("id-ID")}</p>
+            <p class="text-sm"> Rp ${Number(h.insentif).toLocaleString("id-ID")}</p>
             <p class="text-xs text-gray-500">${h.date}</p>
         </div>`;
     });
@@ -575,6 +712,19 @@ function openSurveyModal(i){
             ${s.surveyStatus === "OPEN" ? "bg-green-500 text-white" : "bg-red-500 text-white"}">
             ${s.surveyStatus}
         </span>`;
+
+    if(s.deadline){
+        let daysLeft = getDaysUntilDeadline(s.deadline);
+        let extraInfo = "";
+
+        if(daysLeft !== null && daysLeft >= 0 && daysLeft <= 3){
+            extraInfo = `<span class="text-orange-500"> (${daysLeft === 0 ? "hari ini" : daysLeft + " hari lagi"})</span>`;
+        }
+
+        modalDeadline.innerHTML = formatDeadline(s.deadline) + extraInfo;
+    } else {
+        modalDeadline.innerText = "-";
+    }
 
     modalFeaturedBadge.innerHTML = s.featured
         ? `<span class="bg-yellow-400 text-black px-2 py-1 rounded-full text-xs font-bold">⭐ FEATURED</span>`
@@ -654,6 +804,28 @@ function openResearcherSurveyModal(i){
             ${s.surveyStatus}
         </span>`;
 
+    // DEADLINE: tampilkan tanggal + sisa hari (kalau masih relevan)
+    if(s.deadline){
+        let daysLeft = getDaysUntilDeadline(s.deadline);
+        let extraInfo = "";
+
+        if(s.surveyStatus === "OPEN" || s.surveyStatus === "PAUSED"){
+            if(daysLeft < 0){
+                extraInfo = `<span class="text-red-500"> (sudah lewat)</span>`;
+            } else if(daysLeft === 0){
+                extraInfo = `<span class="text-orange-500"> (hari ini!)</span>`;
+            } else if(daysLeft <= 3){
+                extraInfo = `<span class="text-orange-500"> (${daysLeft} hari lagi ⚠)</span>`;
+            } else {
+                extraInfo = `<span class="text-slate-400"> (${daysLeft} hari lagi)</span>`;
+            }
+        }
+
+        rModalDeadline.innerHTML = formatDeadline(s.deadline) + extraInfo;
+    } else {
+        rModalDeadline.innerText = "Tidak ada deadline";
+    }
+
     rModalProgressLabel.innerText = `${s.current}/${s.count} (${progress}%)`;
     rModalProgressBar.style.width = progress + "%";
 
@@ -680,7 +852,7 @@ function openResearcherSurveyModal(i){
                 onclick="pauseSurvey(${i})"
                 class="w-full bg-yellow-500 hover:bg-yellow-600 transition text-white py-3 rounded-lg font-semibold"
             >
-                ⏸ Pause Survey
+                 Pause Survey
             </button>`;
     }
     else if(s.surveyStatus === "PAUSED"){
@@ -689,7 +861,7 @@ function openResearcherSurveyModal(i){
                 onclick="resumeSurvey(${i})"
                 class="w-full bg-green-500 hover:bg-green-600 transition text-white py-3 rounded-lg font-semibold"
             >
-                ▶️ Resume Survey
+                 Resume Survey
             </button>`;
     }
     else if(s.surveyStatus === "CLOSED"){
@@ -704,7 +876,7 @@ function openResearcherSurveyModal(i){
             onclick="deleteSurvey(${i})"
             class="w-full bg-red-500 hover:bg-red-600 transition text-white py-3 rounded-lg font-semibold"
         >
-            🗑 Hapus Survey
+             Hapus Survey
         </button>`;
 
     rModalActions.innerHTML = actionsHTML;
@@ -735,7 +907,7 @@ function pauseSurvey(i){
     updateStats();
 
     showToast(`Survey "${s.title}" dipause`, "info");
-    addNotification(`⏸ Survey "${s.title}" dipause`);
+    addNotification(` Survey "${s.title}" dipause`);
     renderNotifications();
 
 }
@@ -753,7 +925,7 @@ function resumeSurvey(i){
     updateStats();
 
     showToast(`Survey "${s.title}" dilanjutkan`, "success");
-    addNotification(`▶️ Survey "${s.title}" dilanjutkan`);
+    addNotification(` Survey "${s.title}" dilanjutkan`);
     renderNotifications();
 
 }
@@ -776,7 +948,7 @@ function deleteSurvey(i){
     updateStats();
 
     showToast(`Survey "${s.title}" dihapus`, "error");
-    addNotification(`🗑 Survey "${s.title}" dihapus`);
+    addNotification(` Survey "${s.title}" dihapus`);
     renderNotifications();
 
 }
@@ -797,7 +969,7 @@ function takeSurvey(i){
         surveys[i].surveyStatus !== "CLOSED"
     ){
         surveys[i].surveyStatus = "CLOSED";
-        addNotification(`🎉 Survey "${surveys[i].title}" selesai`);
+        addNotification(` Survey "${surveys[i].title}" selesai`);
         renderNotifications();
     }
 
@@ -1005,6 +1177,18 @@ function renderSurveyProgress(){
             ? Math.round((s.current / viewsCount) * 100)
             : 0;
 
+        // DEADLINE: tampilkan sisa hari & badge "Expiring Soon" (<=3 hari, status masih OPEN)
+        let daysLeft = getDaysUntilDeadline(s.deadline);
+        let expiringSoonBadge = "";
+        let deadlineInfo       = "";
+
+        if(s.deadline){
+            if(s.surveyStatus === "OPEN" && daysLeft !== null && daysLeft <= 3 && daysLeft >= 0){
+                expiringSoonBadge = `<span class="px-2 py-1 rounded-full text-xs font-bold bg-orange-500 text-white ml-1">⚠ Expiring Soon</span>`;
+            }
+            deadlineInfo = `<p class="text-xs text-slate-400 mt-1"> Deadline: ${formatDeadline(s.deadline)}</p>`;
+        }
+
         container.innerHTML += `
         <div
             onclick="openResearcherSurveyModal(${realIndex})"
@@ -1022,10 +1206,12 @@ function renderSurveyProgress(){
                 <span>👁 ${viewsCount} Views</span>
                 <span>📈 ${conversion}% Conversion</span>
             </div>
+            ${deadlineInfo}
             <div class="mt-2">
                 <span class="px-3 py-1 rounded-full text-xs font-bold ${statusBadgeClass}">
                     ${s.surveyStatus}
                 </span>
+                ${expiringSoonBadge}
             </div>
         </div>`;
 
@@ -1104,7 +1290,7 @@ function renderAdminStats(){
             <p>Survey Selesai : ${closedSurvey}</p>
         </div>
         <div class="${subCardClass}">
-            <h3 class="font-semibold mb-3">💰 Statistik Keuangan</h3>
+            <h3 class="font-semibold mb-3"> Statistik Keuangan</h3>
             <p>Revenue : Rp ${revenue.toLocaleString("id-ID")}</p>
             <p>Total Insentif : Rp ${totalInsentif.toLocaleString("id-ID")}</p>
         </div>`;

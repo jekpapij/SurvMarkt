@@ -187,6 +187,32 @@
                     <input id="link" placeholder="Link Survey" class="w-full border p-3 rounded-lg">
                     <textarea id="description" placeholder="Deskripsi Survey" rows="4" class="w-full border p-3 rounded-lg mt-3"></textarea>
                     <input id="duration" type="number" placeholder="Estimasi waktu (menit)" class="w-full border p-3 rounded-lg mt-3"/>
+
+                    <!-- DEADLINE SURVEY -->
+                    <div class="mt-3">
+                        <label class="text-sm font-semibold text-slate-700">Deadline Survey</label>
+                        <select
+                            id="deadlinePreset"
+                            onchange="toggleCustomDeadline()"
+                            class="w-full border p-3 rounded-lg mt-1"
+                        >
+                            <option value="7">7 Hari</option>
+                            <option value="14" selected>14 Hari</option>
+                            <option value="30">30 Hari</option>
+                            <option value="60">60 Hari</option>
+                            <option value="90">90 Hari</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                        <input
+                            id="deadlineCustom"
+                            type="date"
+                            class="hidden w-full border p-3 rounded-lg mt-2"
+                        />
+                        <p class="text-xs text-slate-400 mt-1">
+                            Survey otomatis ditutup setelah deadline terlewati. Gratis, tanpa biaya tambahan.
+                        </p>
+                    </div>
+
                     <div class="mt-4">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" id="featuredSurvey">
@@ -294,7 +320,7 @@
 
             <!-- RIWAYAT SURVEY -->
             <div id="historyWrapper" class="mt-8 rounded-2xl p-6 shadow bg-white">
-                <h2 class="text-xl font-bold mb-4">📜 Riwayat Survey</h2>
+                <h2 class="text-xl font-bold mb-4"> Riwayat Survey</h2>
                 <div id="historyList"></div>
             </div>
 
@@ -340,7 +366,7 @@
 
             <!-- SURVEY TERHAPUS (SOFT DELETE) -->
             <div id="deletedWrapper" class="rounded-3xl p-6 shadow-lg mt-6 bg-slate-100">
-                <h2 class="text-2xl font-bold mb-4">🗑 Survey Terhapus</h2>
+                <h2 class="text-2xl font-bold mb-4"> Survey Terhapus</h2>
                 <p class="text-xs text-slate-400 mb-4">
                     Survey yang dihapus peneliti tetap tersimpan di sini untuk keperluan audit, namun tidak tampil di dashboard peneliti maupun responden.
                 </p>
@@ -388,20 +414,24 @@
 
             <div class="grid grid-cols-2 gap-4 mb-5">
                 <div class="modal-subcard bg-slate-100 rounded-xl p-4">
-                    <p class="text-xs text-slate-500">⏱ Durasi</p>
+                    <p class="text-xs text-slate-500"> Durasi</p>
                     <p id="modalDuration" class="font-bold text-lg mt-1"></p>
                 </div>
                 <div class="modal-subcard bg-slate-100 rounded-xl p-4">
-                    <p class="text-xs text-slate-500">💰 Insentif</p>
+                    <p class="text-xs text-slate-500"> Insentif</p>
                     <p id="modalInsentif" class="font-bold text-lg mt-1 text-indigo-600"></p>
                 </div>
                 <div class="modal-subcard bg-slate-100 rounded-xl p-4">
-                    <p class="text-xs text-slate-500">🎯 Target</p>
+                    <p class="text-xs text-slate-500"> Target</p>
                     <p id="modalTarget" class="font-semibold text-sm mt-1"></p>
                 </div>
                 <div class="modal-subcard bg-slate-100 rounded-xl p-4">
-                    <p class="text-xs text-slate-500">📊 Status</p>
+                    <p class="text-xs text-slate-500"> Status</p>
                     <p id="modalStatus" class="font-semibold text-sm mt-1"></p>
+                </div>
+                <div class="modal-subcard bg-slate-100 rounded-xl p-4 col-span-2">
+                    <p class="text-xs text-slate-500"> Berakhir Pada</p>
+                    <p id="modalDeadline" class="font-semibold text-sm mt-1"></p>
                 </div>
             </div>
 
@@ -457,20 +487,24 @@
 
             <div class="grid grid-cols-2 gap-4 mb-5">
                 <div class="modal-subcard bg-slate-100 rounded-xl p-4">
-                    <p class="text-xs text-slate-500">⏱ Durasi</p>
+                    <p class="text-xs text-slate-500"> Durasi</p>
                     <p id="rModalDuration" class="font-bold text-lg mt-1"></p>
                 </div>
                 <div class="modal-subcard bg-slate-100 rounded-xl p-4">
-                    <p class="text-xs text-slate-500">💰 Insentif</p>
+                    <p class="text-xs text-slate-500"> Insentif</p>
                     <p id="rModalInsentif" class="font-bold text-lg mt-1 text-indigo-600"></p>
                 </div>
                 <div class="modal-subcard bg-slate-100 rounded-xl p-4">
-                    <p class="text-xs text-slate-500">🎯 Target</p>
+                    <p class="text-xs text-slate-500"> Target</p>
                     <p id="rModalTarget" class="font-semibold text-sm mt-1"></p>
                 </div>
                 <div class="modal-subcard bg-slate-100 rounded-xl p-4">
-                    <p class="text-xs text-slate-500">📊 Status</p>
+                    <p class="text-xs text-slate-500"> Status</p>
                     <p id="rModalStatus" class="font-semibold text-sm mt-1"></p>
+                </div>
+                <div class="modal-subcard bg-slate-100 rounded-xl p-4 col-span-2">
+                    <p class="text-xs text-slate-500"> Deadline</p>
+                    <p id="rModalDeadline" class="font-semibold text-sm mt-1"></p>
                 </div>
             </div>
 
