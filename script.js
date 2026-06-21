@@ -24,9 +24,6 @@ let withdrawals =
         localStorage.getItem("withdrawals")
     ) || [];
 
-/* ====================================
-   HELPER: apply dark/light to wrappers
-==================================== */
 
 function applyWrapperTheme(){
 
@@ -61,9 +58,7 @@ function applyWrapperTheme(){
 
 }
 
-/* ====================================
-   WINDOW ONLOAD
-==================================== */
+
 
 window.onload = function(){
 
@@ -154,9 +149,7 @@ window.onload = function(){
 
 };
 
-/* ====================================
-   TOAST
-==================================== */
+
 
 function showToast(msg, type = "info"){
 
@@ -182,9 +175,7 @@ function showToast(msg, type = "info"){
 
 }
 
-/* ====================================
-   WALLET
-==================================== */
+
 
 function updateWallet(){
 
@@ -196,9 +187,7 @@ function updateWallet(){
 
 }
 
-/* ====================================
-   PENELITI
-==================================== */
+
 
 function deposit(){
 
@@ -226,9 +215,7 @@ function deposit(){
 
 }
 
-/* ====================================
-   RESPONDEN
-==================================== */
+
 
 function withdraw(){
 
@@ -258,9 +245,7 @@ function withdraw(){
 
 }
 
-/* ====================================
-   LOGOUT
-==================================== */
+
 
 function logout(){
     localStorage.removeItem("role");
@@ -270,9 +255,7 @@ function logout(){
     window.location.href = "index.html";
 }
 
-/* ====================================
-   KALKULATOR INSENTIF
-==================================== */
+
 
 if(document.getElementById("insentif")){
     insentif.addEventListener("input", calc);
@@ -330,9 +313,7 @@ function calc(){
 
 }
 
-/* ====================================
-   CREATE SURVEY
-==================================== */
+
 
 function createSurvey(){
 
@@ -418,12 +399,6 @@ function createSurvey(){
 
 }
 
-/* ====================================
-   DEADLINE SURVEY
-   - Preset: X hari dari sekarang
-   - Custom: tanggal bebas dipilih peneliti
-   - Pure operasional, TIDAK ADA biaya tambahan
-==================================== */
 
 function toggleCustomDeadline(){
 
@@ -467,13 +442,7 @@ function getDeadlineFromForm(){
 
 }
 
-/* ====================================
-   CEK SURVEY EXPIRED
-   Dijalankan sekali saat window.onload.
-   Karena data persisten di localStorage, status yang
-   sudah di-update tetap akurat meski user baru buka
-   dashboard beberapa hari kemudian.
-==================================== */
+
 
 function checkExpiredSurveys(){
 
@@ -507,9 +476,7 @@ function checkExpiredSurveys(){
 
 }
 
-/* ====================================
-   DEADLINE: HELPER FUNCTIONS
-==================================== */
+
 
 function getDaysUntilDeadline(deadline){
 
@@ -541,9 +508,7 @@ function formatDeadline(deadline){
 
 }
 
-/* ====================================
-   FILTER RESPONDEN
-==================================== */
+
 
 function resetFilter(){
     minPrice.value = "";
@@ -665,9 +630,7 @@ function renderHistory(){
 
 }
 
-/* ====================================
-   SURVEY DETAIL MODAL
-==================================== */
+
 
 let currentModalIndex = null;
 
@@ -754,10 +717,7 @@ function takeSurveyFromModal(){
 
 }
 
-/* ====================================
-   RESEARCHER: MANAGE SURVEY MODAL
-   (Pause / Resume / Delete)
-==================================== */
+
 
 let currentResearcherModalIndex = null;
 
@@ -934,9 +894,7 @@ function deleteSurvey(i){
 
 }
 
-/* ====================================
-   TAKE SURVEY
-==================================== */
+
 
 function takeSurvey(i){
 
@@ -989,9 +947,7 @@ function takeSurvey(i){
 
 }
 
-/* ====================================
-   STATS
-==================================== */
+
 
 function updateStats(){
 
@@ -1069,9 +1025,7 @@ function updateStats(){
 
 }
 
-/* ====================================
-   DARK MODE
-==================================== */
+
 
 function toggleTheme(){
 
@@ -1121,9 +1075,7 @@ function clearSurvey(){
     location.reload();
 }
 
-/* ====================================
-   SURVEY PROGRESS
-==================================== */
+
 
 function renderSurveyProgress(){
 
@@ -1195,9 +1147,7 @@ function renderSurveyProgress(){
 
 }
 
-/* ====================================
-   ADMIN STATS
-==================================== */
+
 
 function renderAdminStats(){
 
@@ -1275,11 +1225,7 @@ function renderAdminStats(){
 
 }
 
-/* ====================================
-   ADMIN: REVENUE CHART (dummy 4 minggu)
-   Minggu 1-3 = dummy kecil, Minggu 4 = revenue asli
-   agar trend kelihatan naik (growth story untuk demo)
-==================================== */
+
 
 function renderRevenueChart(currentRevenue){
 
@@ -1324,10 +1270,7 @@ function renderRevenueChart(currentRevenue){
 
 }
 
-/* ====================================
-   ADMIN: TOP SURVEY WIDGET
-   Ranking top 3 berdasarkan views
-==================================== */
+
 
 function renderTopSurvey(){
 
@@ -1372,9 +1315,7 @@ function renderTopSurvey(){
 
 }
 
-/* ====================================
-   ADMIN: SURVEY TERHAPUS (SOFT DELETE)
-==================================== */
+
 
 function renderDeletedSurveys(){
 
@@ -1419,9 +1360,7 @@ function renderDeletedSurveys(){
 
 }
 
-/* ====================================
-   TOGGLE SIDEBAR
-==================================== */
+
 
 function toggleSidebar(){
 
@@ -1438,9 +1377,7 @@ function toggleSidebar(){
 
 }
 
-/* ====================================
-   WITHDRAWALS
-==================================== */
+
 
 function renderWithdrawals(){
 
@@ -1522,9 +1459,7 @@ function rejectWithdraw(index){
 
 }
 
-/* ====================================
-   NOTIFICATIONS
-==================================== */
+
 
 function addNotification(message){
 
