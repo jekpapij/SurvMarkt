@@ -77,8 +77,6 @@ window.onload = function(){
     updateThemeButton();
     applyWrapperTheme();
 
-    // Cek deadline survey yang sudah lewat -> auto CLOSED.
-    // Harus dijalankan SEBELUM render apapun yang menampilkan status survey.
     checkExpiredSurveys();
 
     let role = localStorage.getItem("role");
@@ -155,8 +153,6 @@ window.onload = function(){
     updateStats();
     renderSurveyProgress();
 
-    // FIX: renderNotifications dipanggil SEKALI di sini saja,
-    // tidak lagi dipanggil di dalam tiap blok role agar tidak spam
     renderNotifications();
 
 };
@@ -379,7 +375,6 @@ function createSurvey(){
         return;
     }
 
-    // DEADLINE SURVEY: ambil dari preset (X hari dari sekarang) atau custom date
     let deadlineValue = getDeadlineFromForm();
     if(deadlineValue === null){
         showToast("Deadline survey tidak valid (harus tanggal di masa depan)","error");
@@ -473,7 +468,6 @@ function getDeadlineFromForm(){
 
         if(!custom) return null;
 
-        // Pastikan custom date di masa depan (minimal besok)
         let chosenDate = new Date(custom + "T23:59:59");
         let now        = new Date();
 
@@ -510,7 +504,6 @@ function checkExpiredSurveys(){
 
     surveys.forEach(s => {
 
-        // Hanya cek survey yang masih OPEN/PAUSED dan punya deadline
         if(
             (s.surveyStatus === "OPEN" || s.surveyStatus === "PAUSED") &&
             s.deadline
@@ -608,15 +601,10 @@ function renderSurvey(){
         ){
             result++;
 
-            // FIX: pakai index asli dari array surveys (bukan index hasil sort)
-            // agar openSurveyModal/takeSurvey selalu merujuk survey yang benar
             let realIndex = surveys.indexOf(s);
 
             let progress = Math.round((s.current / s.count) * 100);
 
-            // FEATURED VISUAL UPGRADE:
-            // - selalu di atas (sudah ditangani lewat sortedSurvey)
-            // - border kuning + shadow lebih terang + gradient tipis
             let cardClass = s.featured
                 ? "relative bg-gradient-to-br from-yellow-50 to-white rounded-2xl shadow-lg shadow-yellow-200/60 p-5 hover:shadow-xl transition border-2 border-yellow-400"
                 : "relative bg-white rounded-2xl shadow p-5 hover:shadow-xl transition border border-transparent";
@@ -710,7 +698,6 @@ function openSurveyModal(i){
 
     currentModalIndex = i;
 
-    // ANALYTICS: views bertambah saat responden membuka detail survey
     s.views = Number(s.views || 0) + 1;
     localStorage.setItem("surveys", JSON.stringify(surveys));
 
@@ -824,7 +811,6 @@ function openResearcherSurveyModal(i){
             ${s.surveyStatus}
         </span>`;
 
-    // DEADLINE: tampilkan tanggal + sisa hari (kalau masih relevan)
     if(s.deadline){
         let daysLeft = getDaysUntilDeadline(s.deadline);
         let extraInfo = "";
@@ -849,7 +835,6 @@ function openResearcherSurveyModal(i){
     rModalProgressLabel.innerText = `${s.current}/${s.count} (${progress}%)`;
     rModalProgressBar.style.width = progress + "%";
 
-    // ANALYTICS: views, respondent (current), conversion = current/views * 100
     let viewsCount = Number(s.views || 0);
     let conversion = viewsCount > 0
         ? Math.round((s.current / viewsCount) * 100)
@@ -859,11 +844,6 @@ function openResearcherSurveyModal(i){
     rModalRespondent.innerText = s.current;
     rModalConversion.innerText = conversion + "%";
 
-    // Tombol aksi disusun sesuai restriksi:
-    // OPEN   -> bisa Pause
-    // PAUSED -> bisa Resume
-    // CLOSED -> tidak bisa pause/resume (final state)
-    // Delete selalu tersedia selama belum DELETED
     let actionsHTML = "";
 
     if(s.surveyStatus === "OPEN"){
@@ -1038,16 +1018,12 @@ function updateStats(){
 
     if(role === "researcher"){
 
-        // Total Spent tetap dihitung dari SEMUA survey (termasuk yang sudah dihapus)
-        // karena uangnya sudah terlanjur dipotong dari wallet saat createSurvey.
         let totalSpent = surveys.reduce((acc,s) => {
             let subtotal = s.count * s.insentif;
             let fee      = subtotal * 0.20;
             return acc + subtotal + fee;
         }, 0);
 
-        // Survey yang DELETED tidak dihitung di Total Survey & Target Responden
-        // karena dari sudut pandang peneliti, survey itu sudah "tidak ada".
         let visibleSurveys = surveys.filter(s => s.surveyStatus !== "DELETED");
 
         let totalSurvey      = visibleSurveys.length;
@@ -1162,13 +1138,6 @@ function clearSurvey(){
     location.reload();
 }
 
-/* ====================================
-   DEMO DATA SEEDER
-   Hanya untuk keperluan presentasi/demo.
-   Mengisi survey, withdrawal, dan notifikasi
-   dengan jumlah yang realistis (tidak berlebihan)
-   agar tetap mudah dibaca saat ditampilkan ke audiens.
-==================================== */
 
 function generateDemoData(){
 
@@ -1274,13 +1243,10 @@ function generateDemoData(){
     withdrawals.push(...demoWithdrawals);
     localStorage.setItem("withdrawals", JSON.stringify(withdrawals));
 
-    // Revenue demo: dijumlahkan dari fee 20% tiap survey demo
     let demoRevenue = demoSurveys.reduce((acc, s) => acc + (s.count * s.insentif * 0.20), 0);
     let currentRevenue = Number(localStorage.getItem("revenue")) || 0;
     localStorage.setItem("revenue", currentRevenue + demoRevenue);
 
-    // Notifikasi mengikuti aktivitas demo agar tetap kontekstual,
-    // bukan 100 notifikasi acak tanpa makna.
     addNotification(`📋 Survey "${demoSurveys[0].title}" berhasil dibuat`);
     addNotification(`⭐ Survey "${demoSurveys[3].title}" dijadikan featured`);
     addNotification(`✅ Survey "${demoSurveys[1].title}" berhasil diisi`);
@@ -1333,7 +1299,6 @@ function renderSurveyProgress(){
 
     container.innerHTML = "";
 
-    // Survey yang DELETED tidak ditampilkan di dashboard peneliti
     let visibleSurveys = surveys.filter(s => s.surveyStatus !== "DELETED");
 
     if(visibleSurveys.length === 0){
@@ -1351,13 +1316,11 @@ function renderSurveyProgress(){
             s.surveyStatus === "PAUSED" ? "bg-yellow-500 text-white" :
                                            "bg-red-500 text-white";
 
-        // ANALYTICS: views & conversion rate (current / views * 100)
         let viewsCount  = Number(s.views || 0);
         let conversion  = viewsCount > 0
             ? Math.round((s.current / viewsCount) * 100)
             : 0;
 
-        // DEADLINE: tampilkan sisa hari & badge "Expiring Soon" (<=3 hari, status masih OPEN)
         let daysLeft = getDaysUntilDeadline(s.deadline);
         let expiringSoonBadge = "";
         let deadlineInfo       = "";
@@ -1431,7 +1394,6 @@ function renderAdminStats(){
 
     let revenue = Number(localStorage.getItem("revenue")) || 0;
 
-    // Survey DELETED tidak dihitung di statistik normal — ditampilkan terpisah
     let activeSurveysList = surveys.filter(s => s.surveyStatus !== "DELETED");
 
     let activeSurvey = activeSurveysList.filter(s => s.surveyStatus === "OPEN").length;
@@ -1500,9 +1462,6 @@ function renderRevenueChart(currentRevenue){
             : "rounded-3xl p-6 shadow-lg bg-white text-slate-900";
     }
 
-    // Dummy proporsional dari revenue saat ini, minggu terakhir = revenue asli.
-    // Kalau revenue masih 0 (belum ada survey), tetap kasih dummy kecil
-    // biar chart-nya tidak kosong total.
     let base = currentRevenue > 0 ? currentRevenue : 40000;
 
     let weeks = [
@@ -1550,7 +1509,6 @@ function renderTopSurvey(){
             : "rounded-3xl p-6 shadow-lg bg-white text-slate-900";
     }
 
-    // Survey DELETED tidak ikut diranking
     let ranked = surveys
         .filter(s => s.surveyStatus !== "DELETED")
         .slice()
@@ -1752,7 +1710,6 @@ function addNotification(message){
 
 function renderNotifications(){
 
-    // FIX: pakai querySelector agar tidak bergantung pada posisi elemen di DOM
     let list = document.getElementById("notificationList");
     if(!list) return;
 
