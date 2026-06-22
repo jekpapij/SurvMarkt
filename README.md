@@ -82,7 +82,7 @@ Implementasi Backend Database belum diberlakukan untuk kemudahan demo
 
 ##  Cara Menjalankan
 
-1. Buka `landing.html` untuk melihat halaman perkenalan, atau langsung ke `index.html`
+1. Buka `landing.html` untuk melihat halaman perkenalan, atau langsung ke `index.html` (Live-server)
 2. Pilih role (Peneliti / Responden / Admin)
 3. Jika memilih Responden, isi profil (gender, umur, status) — minimal 17 tahun
 4. Klik **Masuk ke SurvMarkt** → diarahkan ke `dashboard.html`
