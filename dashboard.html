@@ -6,91 +6,54 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SurvMarkt Dashboard</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 
-.dark{
-    background:#0f172a !important;
+:root{
+    --indigo-900: #312E81;
+    --indigo-600: #4F46E5;
+    --indigo-50:  #EEF2FF;
+    --amber-500:  #F59E0B;
+    --slate-900:  #0F172A;
 }
-.dark main{
-    background:#0f172a;
+
+*{ font-family: 'Inter', sans-serif; }
+.font-display{ font-family: 'Lora', serif; }
+.font-mono{ font-family: 'JetBrains Mono', monospace; }
+.eyebrow{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
 }
-.dark .bg-white{
-    background:#1e293b !important;
-    color:white !important;
-}
-.dark .dark-reset-btn{
-    background:#334155 !important;
-    color:white !important;
-}
-.dark .dark-reset-btn:hover{
-    background:#475569 !important;
-}
-.dark input::placeholder{
-    color:#94a3b8;
-}
-.dark select::placeholder{
-    color:#94a3b8;
-}
-.dark #resultCount{
-    color:#cbd5e1 !important;
-}
-.dark input,
-.dark select,
-.dark textarea{
-    background:#334155 !important;
-    color:white !important;
-    border-color:#475569 !important;
-}
-.dark input::placeholder,
-.dark textarea::placeholder{
-    color:#94a3b8 !important;
-}
-.dark textarea:focus{
-    outline:none;
-    border-color:#818cf8 !important;
-    box-shadow: 0 0 0 2px rgba(129,140,248,.3);
-}
-.dark .text-slate-800,
-.dark .text-slate-500,
-.dark .text-gray-500{
-    color:#cbd5e1 !important;
-}
-.dark #surveyList > div,
-.dark #stats > div{
-    background:#1e293b !important;
-    color:white !important;
-}
-.dark hr{
-    border-color:#64748b !important;
-}
-.dark #adminStats > div{
-    background:#1e293b !important;
-    color:white !important;
-}
-.dark #surveyModalBox{
-    background:#1e293b !important;
-    color:white !important;
-}
-.dark #modalDuration,
-.dark #modalTarget,
-.dark #modalStatus{
-    color:white !important;
-}
-.dark .modal-subcard{
-    background:#334155 !important;
-}
-.dark #revenueChartWrapper,
-.dark #topSurveyWrapper{
-    background:#1e293b !important;
-    color:white !important;
-}
-.dark #revenueChart .bar-label{
-    color:#cbd5e1 !important;
-}
-.dark .top-survey-card{
-    background:#334155 !important;
-    color:white !important;
-}
+
+/* ========== DARK MODE ========== */
+.dark{ background:#0f172a !important; }
+.dark main{ background:#0f172a; }
+.dark #sidebar{ background:#0f0d2e !important; border-right:1px solid rgba(79,70,229,0.2); }
+.dark .bg-white{ background:#1e293b !important; color:white !important; }
+.dark .dark-reset-btn{ background:#334155 !important; color:white !important; }
+.dark .dark-reset-btn:hover{ background:#475569 !important; }
+.dark input::placeholder{ color:#94a3b8; }
+.dark select::placeholder{ color:#94a3b8; }
+.dark #resultCount{ color:#cbd5e1 !important; }
+.dark input,.dark select,.dark textarea{ background:#334155 !important; color:white !important; border-color:#475569 !important; }
+.dark input::placeholder,.dark textarea::placeholder{ color:#94a3b8 !important; }
+.dark textarea:focus{ outline:none; border-color:#818cf8 !important; box-shadow:0 0 0 2px rgba(129,140,248,.3); }
+.dark .text-slate-800,.dark .text-slate-500,.dark .text-gray-500{ color:#cbd5e1 !important; }
+.dark .text-indigo-900{ color:#c7d2fe !important; }
+.dark .font-display{ color:#c7d2fe !important; }
+.dark #surveyList > div,.dark #stats > div{ background:#1e293b !important; color:white !important; }
+.dark hr{ border-color:#312E81 !important; }
+.dark #adminStats > div{ background:#1e293b !important; color:white !important; }
+.dark #surveyModalBox,.dark #researcherSurveyModalBox{ background:#1e293b !important; color:white !important; }
+.dark #modalDuration,.dark #modalTarget,.dark #modalStatus,.dark #modalDeadline,
+.dark #rModalDuration,.dark #rModalTarget,.dark #rModalStatus,.dark #rModalDeadline{ color:white !important; }
+.dark .modal-subcard{ background:#334155 !important; }
+.dark #revenueChartWrapper,.dark #topSurveyWrapper{ background:#1e293b !important; color:white !important; }
+.dark #revenueChart .bar-label{ color:#cbd5e1 !important; }
+.dark .top-survey-card{ background:#334155 !important; color:white !important; }
 
 </style>
 </head>
@@ -105,12 +68,12 @@
     <!-- SIDEBAR -->
     <aside
         id="sidebar"
-        class="w-72 min-h-screen bg-indigo-600 text-white p-6 transition-all duration-300"
+        class="w-72 min-h-screen bg-indigo-900 text-white p-6 transition-all duration-300"
     >
         <div class="flex justify-between items-center mb-4">
             <button
                 onclick="toggleSidebar()"
-                class="bg-indigo-500 px-3 py-2 rounded-lg hover:bg-indigo-400"
+                class="bg-indigo-800 hover:bg-indigo-700 px-3 py-2 rounded-lg transition"
             >
                 ☰
             </button>
@@ -118,45 +81,45 @@
 
         <div id="sidebarContent"></div>
 
-        <h1 id="logoText" class="text-3xl font-bold transition-all duration-300">SurvMarkt</h1>
+        <h1 id="logoText" class="font-display text-2xl font-semibold transition-all duration-300">SurvMarkt</h1>
 
-        <p id="sidebarDesc" class="text-sm text-indigo-200 mt-2">
-            Marketplace Responden Penelitian
+        <p id="sidebarDesc" class="eyebrow text-indigo-300 mt-2">
+            Responden Penelitian
         </p>
 
-        <hr id="line" class="my-5 border-indigo-400">
+        <hr id="line" class="my-5 border-indigo-700">
 
-        <p id="roleText" class="font-semibold"></p>
+        <p id="roleText" class="eyebrow text-indigo-300"></p>
 
         <!-- WALLET -->
-        <div id="walletbox" class="mt-6 bg-indigo-500 rounded-xl p-4 transition-all duration-300">
-            <h3 class="font-semibold">Wallet</h3>
-            <p id="wallet" class="text-xl font-bold mt-2"></p>
+        <div id="walletbox" class="mt-6 bg-indigo-800 rounded-xl p-4 transition-all duration-300 border border-indigo-700">
+            <p class="eyebrow text-indigo-300 mb-1">Wallet</p>
+            <p id="wallet" class="font-display text-lg font-semibold mt-1"></p>
 
             <div id="walletAction" class="mt-4"></div>
 
             <button
                 onclick="toggleTheme()"
                 id="themeBtn"
-                class="w-full mt-3 bg-slate-700 hover:bg-slate-800 transition py-2 rounded-lg"
+                class="w-full mt-3 bg-indigo-700 hover:bg-indigo-600 transition py-2 rounded-lg text-sm"
             ></button>
 
             <button
                 onclick="clearSurvey()"
-                class="w-full mt-2 bg-yellow-500 hover:bg-yellow-600 py-2 rounded-lg"
+                class="w-full mt-2 bg-amber-500 hover:bg-amber-400 transition text-indigo-900 font-semibold py-2 rounded-lg text-sm"
             >
                 Clear Survey
             </button>
         </div>
 
-        <p class="mt-4 text-sm text-indigo-200">
+        <p class="mt-4 eyebrow text-indigo-400">
             🔔 <span id="notifCount">0</span> Notifikasi
         </p>
 
         <button
             id="logoutbox"
             onclick="logout()"
-            class="mt-5 w-full bg-red-500 hover:bg-red-600 transition py-2 rounded-lg"
+            class="mt-5 w-full bg-red-600 hover:bg-red-500 transition py-2 rounded-lg text-sm font-semibold"
         >
             Logout
         </button>
@@ -167,8 +130,9 @@
 
         <!-- HEADER -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-slate-800">SurvMarkt Dashboard</h1>
-            <p class="text-slate-500 mt-2" id="dashboardSubtitle"></p>
+            <p class="eyebrow text-indigo-600 mb-1">Dashboard</p>
+            <h1 class="font-display text-3xl font-semibold text-indigo-900">SurvMarkt</h1>
+            <p class="text-slate-500 mt-1 text-sm" id="dashboardSubtitle"></p>
         </div>
 
         <!-- STATS -->
@@ -254,6 +218,7 @@
                         <option value="All">Semua Status</option>
                         <option value="Mahasiswa">Mahasiswa</option>
                         <option value="Pekerja">Pekerja</option>
+                        <option value="Umum">Masyarakat Umum</option>
                     </select>
                 </div>
 

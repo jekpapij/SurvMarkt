@@ -16,7 +16,9 @@ let notifications =
 let fakeUsers = [
     { gender: "Male",   age: "18-22", status: "Mahasiswa" },
     { gender: "Female", age: "23-30", status: "Pekerja"   },
-    { gender: "Male",   age: "23-30", status: "Mahasiswa" }
+    { gender: "Male",   age: "23-30", status: "Mahasiswa" },
+    { gender: "Female", age: "18-22", status: "Umum"      },
+    { gender: "Male",   age: "23-30", status: "Umum"      }
 ];
 
 let withdrawals =
@@ -82,7 +84,8 @@ window.onload = function(){
     let role = localStorage.getItem("role");
 
     roleText.innerText =
-        role === "researcher" ? "Peneliti" : "Responden";
+        role === "researcher" ? "Peneliti" :
+        role === "admin"      ? "Admin"    : "Responden";
 
     if(role === "researcher"){
 
@@ -1236,6 +1239,15 @@ function generateDemoData(){
             insentif: 2000, featured: false,
             gender: "All", age: "All", status: "Pekerja",
             deadline: daysFromNow(-1)
+        },
+        {
+            title: "Persepsi Masyarakat Umum tentang Kesehatan Mental",
+            description: "Penelitian untuk mengetahui tingkat kesadaran masyarakat umum terhadap isu kesehatan mental dan akses layanan konseling.",
+            duration: 9, count: 120, current: 41, views: 178,
+            surveyStatus: "OPEN", link: "https://forms.gle/demo8",
+            insentif: 3500, featured: false,
+            gender: "All", age: "All", status: "Umum",
+            deadline: daysFromNow(25)
         },
         {
             title: "Survey Internal yang Sudah Tidak Relevan",
