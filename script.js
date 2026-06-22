@@ -1643,7 +1643,7 @@ function toggleSidebar(){
     document.getElementById("line")        ?.classList.toggle("hidden");
     document.getElementById("roleText")    ?.classList.toggle("hidden");
     document.getElementById("logoutbox")   ?.classList.toggle("hidden");
-
+    document.getElementById("notificationWrapper") ?.classList.toggle("hidden");
 }
 
 /* ====================================
