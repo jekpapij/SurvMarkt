@@ -1,121 +1,107 @@
-# SurvMarkt 
+# SurvMarkt — Marketplace Responden Penelitian
 
-> Marketplace Responden Penelitian — Platform yang menghubungkan peneliti dengan responden secara efisien dan transparan.
+> Tugas Besar Kewirausahaan Berbasis Teknologi
 
----
-
-##  Tentang Proyek
-
-SurvMarkt adalah platform berbasis web yang mempertemukan **peneliti** yang membutuhkan responden dengan **responden** yang ingin mendapatkan insentif dari mengisi survey. Platform ini dilengkapi dengan dashboard **admin** untuk memonitor performa dan mengelola transaksi.
-
-Proyek ini dibuat sebagai Tugas Besar mata kuliah **Kewirausahaan Berbasis Teknologi**.
+SurvMarkt adalah platform web yang mempertemukan **peneliti** yang membutuhkan responden dengan **responden** yang ingin mendapatkan insentif dari pengisian survey. Dibangun dengan Vanilla JavaScript dan Tailwind CSS, menggunakan `localStorage` sebagai media penyimpanan data (untuk keperluan demo/prototype).
 
 ---
 
-##  Role Pengguna
+## 📌 Latar Belakang
+
+Peneliti (mahasiswa, dosen) sering kesulitan mendapatkan responden dengan kriteria spesifik dalam waktu terbatas, sementara banyak masyarakat yang sebenarnya bersedia mengisi survey jika diberi insentif/ apresiasi yang jelas. SurvMarkt menjembatani kedua kebutuhan ini dalam satu platform sederhana berbasis browser.
+
+---
+
+## 👥 Tiga Peran Pengguna
 
 | Role | Deskripsi |
 |---|---|
-| **Peneliti** | Membuat survey, menentukan target responden & insentif, memantau progress |
-| **Responden** | Menemukan survey yang sesuai profil dan mendapatkan insentif |
-| **Admin** | Memonitor statistik platform dan mengelola withdrawal request |
+| **Peneliti** | Membuat survey, menentukan target responden, mengatur insentif, memantau progress |
+| **Responden** | Mencari & mengisi survey yang relevan dengan profilnya, mendapat insentif ke wallet |
+| **Admin** | Memantau performa platform, revenue, dan mengelola berjalannya respondensi survey |
 
 ---
 
-##  Fitur Utama
+## ✨ Fitur Utama
 
-**Peneliti**
-- Buat survey dengan judul, deskripsi, link, estimasi durasi, dan insentif
-- Filter target responden berdasarkan gender, umur, dan status
-- Estimasi matching responden sebelum submit
-- Opsi Featured Survey agar tampil di urutan teratas
-- Kalkulator otomatis biaya survey + platform fee 20%
-- Pantau progress tiap survey secara real-time
+### Untuk Peneliti
+- Buat survey dengan judul, deskripsi, durasi, link, dan jumlah target responden
+- Atur **kriteria responden**: gender, rentang umur, status (mahasiswa/pekerja/umum)
+- Kalkulator insentif otomatis (subtotal, platform fee 20%, biaya featured)
+- Deadline survey fleksibel (preset 7/14/30/60/90 hari atau custom tanggal)
+- **Featured Survey** (+Rp 5.000) untuk naik ke posisi teratas daftar responden
+- Kelola survey: pause, resume, atau hapus (soft delete) lewat modal detail survey
+- Lihat analytics per survey: views, jumlah responden, conversion rate
+- Deposit dana ke wallet
 
-**Responden**
-- Lihat daftar survey yang sesuai profil
-- Filter berdasarkan keyword dan minimal insentif
+### Untuk Responden
+- Lihat hanya survey yang **relevan dengan profilnya** (gender/umur/status otomatis match)
+- Cari survey berdasarkan judul & filter minimal insentif
+- Modal detail survey lengkap sebelum memutuskan untuk mengisi survey
 - Insentif otomatis masuk ke wallet setelah mengisi survey
 - Riwayat survey yang sudah dikerjakan
-- Withdraw saldo ke rekening
+- Request withdraw saldo
 
-**Admin**
-- Dashboard statistik: total survey, survey aktif, survey selesai, revenue
-- Business metrics: statistik pengguna & keuangan
-- Kelola withdrawal request (approve / reject)
+### Untuk Admin
+- Dashboard statistik platform (total survey, survey aktif/selesai, revenue)
+- Grafik tren revenue 4 minggu terakhir
+- Widget Top Survey (ranking berdasarkan views)
+- Kelola withdrawal request (approve/reject)
+- Riwayat survey yang dihapus peneliti (soft delete, untuk audit)
+- Generate/reset demo data untuk keperluan presentasi
 
-**Umum**
-- Dark mode / Light mode
-- Notifikasi real-time tiap aktivitas
-- Wallet per pengguna
-
----
-
-##  Tech Stack
-
-| Layer | Teknologi |
-|---|---|
-| Frontend | HTML5, Tailwind CSS (CDN) |
-| Logic | Vanilla JavaScript |
-| Storage | Browser localStorage |
-
-Implementasi Backend database in-progress.
+### Fitur Lintas Role
+- 🌙 Dark Mode
+- 🔔 Sistem notifikasi real-time untuk setiap aktivitas penting
+-  Empty state yang informatif di setiap list kosong
+-  Sidebar collapsible
 
 ---
 
-##  Struktur File
+## 🛠️ Tech Stack
+
+- **HTML5 + Tailwind CSS** (via CDN) — struktur & styling
+- **Vanilla JavaScript** — seluruh logika aplikasi, tanpa framework
+- **Google Fonts**: Lora (display), Inter (body), JetBrains Mono (label/eyebrow)
+- **localStorage** — penyimpanan data sisi klien (surveys, wallet, notifikasi, dll.)
+
+---
+
+## 📁 Struktur File
 
 ```
-survmarkt/
-├── index.html       # Halaman login & pemilihan role
-├── dashboard.html   # Dashboard utama (researcher / respondent / admin)
-└── script.js        # Seluruh logika aplikasi
+├── landing.html     → Landing page perkenalan platform
+├── index.html       → Halaman login (pilih role: peneliti/responden/admin)
+├── dashboard.html   → Dashboard utama (berbeda tampilan tiap role)
+└── script.js        → Seluruh logika aplikasi
 ```
 
 ---
 
 ##  Cara Menjalankan
 
-1. Clone atau download repository ini
-2. Buka file `index.html` lewat Live-Server di browser
-3. Pilih role, isi data, klik **Masuk ke SurvMarkt**
+1. Buka `landing.html` untuk melihat halaman perkenalan, atau langsung ke `index.html`
+2. Pilih role (Peneliti / Responden / Admin)
+3. Jika memilih Responden, isi profil (gender, umur, status) — minimal 17 tahun
+4. Klik **Masuk ke SurvMarkt** → diarahkan ke `dashboard.html`
+5. Wallet awal otomatis terisi Rp 100.000 untuk simulasi
 
-Tidak perlu install apapun.
-
----
-
-##  Reset Data (untuk testing ulang)
-
-Buka browser console (`F12` → Console) lalu jalankan:
-
-```js
-localStorage.clear()
-```
-Refresh page
+> ! Untuk demo cepat saat presentasi, masuk sebagai **Admin** lalu klik **Generate Demo Data** — dashboard akan terisi contoh survey, withdrawal, dan notifikasi secara instan.
 
 ---
 
-##  Alur Penggunaan
+##  Alur Sistem (Flow Singkat)
 
-```
-Login (index.html)
-    │
-    ├── Peneliti  → Deposit → Buat Survey → Pantau Progress
-    │
-    ├── Responden → Cari Survey → Isi Survey → Dapat Insentif → Withdraw
-    │
-    └── Admin     → Monitor Statistik → Approve / Reject Withdrawal
-```
+**Peneliti** → Deposit dana → Buat survey + kriteria → Bayar (insentif × target + fee 20%) → Survey tampil ke responden yang cocok → Pantau progress & analytics
+
+**Responden** → Login dengan profil → Lihat survey yang match → Isi survey → Insentif masuk wallet → Withdraw saldo
+
+**Admin** → Pantau seluruh aktivitas platform → Approve/reject withdrawal → Audit survey & revenue
 
 ---
 
-##  Catatan
+## ⚠️ Catatan
 
-- Wallet awal setiap pengguna baru: **Rp 100.000**
-- Platform fee: **20%** dari total biaya survey
-- Featured Survey: tambahan biaya **Rp 5.000**
-- Rekomendasi insentif per responden: **Rp 1.000 – Rp 5.000**
-
----
-
-*Dibuat dengan sepenuh ❤️ untuk Tugas Besar Kewirausahaan Berbasis Teknologi*
+- Karena menggunakan `localStorage`, data tersimpan per-browser dan tidak disinkronkan ke server — cocok untuk prototype/demo, belum untuk produksi multi-user nyata.
+- Status survey otomatis berubah jadi `CLOSED` ketika deadline terlewati (dicek setiap kali dashboard dibuka).
+- Soft delete diterapkan pada penghapusan survey: data tetap tersimpan untuk keperluan audit admin, namun disembunyikan dari peneliti & responden.
