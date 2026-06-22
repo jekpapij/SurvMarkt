@@ -65,6 +65,8 @@ Peneliti (mahasiswa, dosen) sering kesulitan mendapatkan responden dengan kriter
 - **Google Fonts**: Lora (display), Inter (body), JetBrains Mono (label/eyebrow)
 - **localStorage** — penyimpanan data sisi klien (surveys, wallet, notifikasi, dll.)
 
+Implementasi Backend Database belum diberlakukan untuk kemudahan demo
+
 ---
 
 ## 📁 Struktur File
@@ -105,3 +107,7 @@ Peneliti (mahasiswa, dosen) sering kesulitan mendapatkan responden dengan kriter
 - Karena menggunakan `localStorage`, data tersimpan per-browser dan tidak disinkronkan ke server — cocok untuk prototype/demo, belum untuk produksi multi-user nyata.
 - Status survey otomatis berubah jadi `CLOSED` ketika deadline terlewati (dicek setiap kali dashboard dibuka).
 - Soft delete diterapkan pada penghapusan survey: data tetap tersimpan untuk keperluan audit admin, namun disembunyikan dari peneliti & responden.
+
+---
+
+*Dibuat dengan sepenuh ❤️ untuk Tugas Besar Kewirausahaan Berbasis Teknologi*
